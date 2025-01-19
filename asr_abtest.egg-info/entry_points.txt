@@ -1,0 +1,3 @@
+[console_scripts]
+asr-abtest-ui = asr_abtest.ui.app:main
+serve-asr = asr_abtest.server:main

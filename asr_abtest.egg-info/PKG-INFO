@@ -1,7 +1,7 @@
 Metadata-Version: 2.2
-Name: local-whisper
+Name: asr-abtest
 Version: 0.1.0
-Summary: Local Whisper transcription service with HTML UI
+Summary: ASR A/B Testing Framework with Web UI
 Requires-Python: >=3.8
 Requires-Dist: torch
 Requires-Dist: transformers

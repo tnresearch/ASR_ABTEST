@@ -3,9 +3,9 @@ requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "local-whisper"
+name = "asr-abtest"
 version = "0.1.0"
-description = "Local Whisper transcription service with HTML UI"
+description = "ASR A/B Testing Framework with Web UI"
 requires-python = ">=3.8"
 dependencies = [
     "torch",
@@ -18,8 +18,8 @@ dependencies = [
 ]
 
 [project.scripts]
-serve-whisper = "local_whisper.server:main"
-whisper-ui = "local_whisper.ui.app:main"
+serve-asr = "asr_abtest.server:main"
+asr-abtest-ui = "asr_abtest.ui.app:main"
 
 [tool.setuptools]
-packages = ["local_whisper"]
+packages = ["asr_abtest"]

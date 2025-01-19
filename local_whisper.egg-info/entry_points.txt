@@ -1,3 +1,0 @@
-[console_scripts]
-serve-whisper = local_whisper.server:main
-whisper-ui = local_whisper.ui.app:main
