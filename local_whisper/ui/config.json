@@ -1,0 +1,43 @@
+{
+  "transcript_ratings": {
+    "title": "Transcript Quality Ratings",
+    "scales": [
+      {
+        "id": "accuracy",
+        "label": "Accuracy",
+        "description": "How accurate is the transcription compared to the audio?",
+        "options": [
+          {"value": 1, "label": "Very Poor"},
+          {"value": 2, "label": "Poor"},
+          {"value": 3, "label": "Fair"},
+          {"value": 4, "label": "Good"},
+          {"value": 5, "label": "Excellent"}
+        ]
+      },
+      {
+        "id": "punctuation",
+        "label": "Punctuation",
+        "description": "How well are punctuation and sentence breaks handled?",
+        "options": [
+          {"value": 1, "label": "Very Poor"},
+          {"value": 2, "label": "Poor"},
+          {"value": 3, "label": "Fair"},
+          {"value": 4, "label": "Good"},
+          {"value": 5, "label": "Excellent"}
+        ]
+      },
+      {
+        "id": "timing",
+        "label": "Word Timing",
+        "description": "How accurate are the word timings?",
+        "options": [
+          {"value": 1, "label": "Very Poor"},
+          {"value": 2, "label": "Poor"},
+          {"value": 3, "label": "Fair"},
+          {"value": 4, "label": "Good"},
+          {"value": 5, "label": "Excellent"}
+        ]
+      }
+    ]
+  }
+} 

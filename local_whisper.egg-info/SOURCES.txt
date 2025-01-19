@@ -1,0 +1,10 @@
+pyproject.toml
+local_whisper/__init__.py
+local_whisper/html_ui.py
+local_whisper/server.py
+local_whisper.egg-info/PKG-INFO
+local_whisper.egg-info/SOURCES.txt
+local_whisper.egg-info/dependency_links.txt
+local_whisper.egg-info/entry_points.txt
+local_whisper.egg-info/requires.txt
+local_whisper.egg-info/top_level.txt

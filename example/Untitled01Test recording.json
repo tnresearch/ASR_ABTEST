@@ -1,0 +1,135 @@
+{
+  "words": [
+    {
+      "text": "For",
+      "start": 0.0,
+      "end": 0.44
+    },
+    {
+      "text": "å",
+      "start": 0.44,
+      "end": 2.7
+    },
+    {
+      "text": "finne",
+      "start": 2.7,
+      "end": 3.0
+    },
+    {
+      "text": "ut",
+      "start": 3.0,
+      "end": 3.44
+    },
+    {
+      "text": "av",
+      "start": 3.44,
+      "end": 4.48
+    },
+    {
+      "text": "modellen",
+      "start": 4.48,
+      "end": 6.6
+    },
+    {
+      "text": "kan",
+      "start": 6.6,
+      "end": 7.52
+    },
+    {
+      "text": "forstå",
+      "start": 7.52,
+      "end": 7.94
+    },
+    {
+      "text": "hva",
+      "start": 7.94,
+      "end": 8.28
+    },
+    {
+      "text": "jeg",
+      "start": 8.28,
+      "end": 8.28
+    },
+    {
+      "text": "sier.",
+      "start": 8.28,
+      "end": 8.84
+    },
+    {
+      "text": "For",
+      "start": 8.84,
+      "end": 9.02
+    },
+    {
+      "text": "jeg",
+      "start": 9.02,
+      "end": 9.3
+    },
+    {
+      "text": "har",
+      "start": 9.3,
+      "end": 10.2
+    },
+    {
+      "text": "laga",
+      "start": 10.2,
+      "end": 10.46
+    },
+    {
+      "text": "portkast,",
+      "start": 10.46,
+      "end": 12.92
+    },
+    {
+      "text": "og",
+      "start": 12.92,
+      "end": 12.92
+    },
+    {
+      "text": "det",
+      "start": 12.92,
+      "end": 12.98
+    },
+    {
+      "text": "er",
+      "start": 12.98,
+      "end": 12.98
+    },
+    {
+      "text": "en",
+      "start": 12.98,
+      "end": 13.44
+    },
+    {
+      "text": "riktig",
+      "start": 13.44,
+      "end": 13.74
+    },
+    {
+      "text": "god",
+      "start": 13.74,
+      "end": 14.0
+    },
+    {
+      "text": "bortkast,",
+      "start": 14.0,
+      "end": 16.14
+    },
+    {
+      "text": "som",
+      "start": 16.14,
+      "end": 16.24
+    },
+    {
+      "text": "slår",
+      "start": 16.24,
+      "end": 16.44
+    },
+    {
+      "text": "da.",
+      "start": 16.44,
+      "end": null
+    }
+  ],
+  "full_text": "For å finne ut av modellen kan forstå hva jeg sier. For jeg har laga portkast, og det er en riktig god bortkast, som slår da."
+}

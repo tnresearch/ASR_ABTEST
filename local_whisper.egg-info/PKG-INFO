@@ -1,0 +1,12 @@
+Metadata-Version: 2.2
+Name: local-whisper
+Version: 0.1.0
+Summary: Local Whisper transcription service with HTML UI
+Requires-Python: >=3.8
+Requires-Dist: torch
+Requires-Dist: transformers
+Requires-Dist: fastapi
+Requires-Dist: uvicorn
+Requires-Dist: python-multipart
+Requires-Dist: flask
+Requires-Dist: requests
