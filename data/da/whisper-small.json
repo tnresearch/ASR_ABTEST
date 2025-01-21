@@ -1,0 +1,151 @@
+{
+  "success": true,
+  "words": [
+    {
+      "text": "Håmme",
+      "start": 0,
+      "end": 2.72
+    },
+    {
+      "text": "-sobe!",
+      "start": 2.72,
+      "end": 3.7
+    },
+    {
+      "text": "Håmme",
+      "start": 3.7,
+      "end": 4.22
+    },
+    {
+      "text": "-sobe",
+      "start": 4.22,
+      "end": 4.54
+    },
+    {
+      "text": "er",
+      "start": 4.54,
+      "end": 4.74
+    },
+    {
+      "text": "ikke",
+      "start": 4.74,
+      "end": 4.92
+    },
+    {
+      "text": "kræft,",
+      "start": 4.92,
+      "end": 5.32
+    },
+    {
+      "text": "det",
+      "start": 5.32,
+      "end": 5.38
+    },
+    {
+      "text": "er",
+      "start": 5.38,
+      "end": 5.42
+    },
+    {
+      "text": "med",
+      "start": 5.42,
+      "end": 5.5
+    },
+    {
+      "text": "lige",
+      "start": 5.5,
+      "end": 5.7
+    },
+    {
+      "text": "sændag.",
+      "start": 5.7,
+      "end": 6.72
+    },
+    {
+      "text": "Jeg",
+      "start": 6.72,
+      "end": 7.02
+    },
+    {
+      "text": "elsker",
+      "start": 7.02,
+      "end": 8.48
+    },
+    {
+      "text": "håmme",
+      "start": 8.48,
+      "end": 8.8
+    },
+    {
+      "text": "-sobe",
+      "start": 8.8,
+      "end": 9.08
+    },
+    {
+      "text": "og",
+      "start": 9.08,
+      "end": 9.44
+    },
+    {
+      "text": "er",
+      "start": 9.44,
+      "end": 10.64
+    },
+    {
+      "text": "egentlig",
+      "start": 10.64,
+      "end": 12.12
+    },
+    {
+      "text": "også",
+      "start": 12.12,
+      "end": 12.28
+    },
+    {
+      "text": "ret",
+      "start": 12.28,
+      "end": 12.46
+    },
+    {
+      "text": "god",
+      "start": 12.46,
+      "end": 12.64
+    },
+    {
+      "text": "til",
+      "start": 12.64,
+      "end": 12.8
+    },
+    {
+      "text": "at",
+      "start": 12.8,
+      "end": 13.06
+    },
+    {
+      "text": "tale",
+      "start": 13.06,
+      "end": 13.06
+    },
+    {
+      "text": "dansk,",
+      "start": 13.06,
+      "end": 13.52
+    },
+    {
+      "text": "vil",
+      "start": 13.52,
+      "end": 13.68
+    },
+    {
+      "text": "jeg",
+      "start": 13.68,
+      "end": 13.78
+    },
+    {
+      "text": "sige.",
+      "start": 13.78,
+      "end": 14.28
+    }
+  ],
+  "model_id": "openai/whisper-small"
+}

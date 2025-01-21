@@ -7,3 +7,5 @@ asr_abtest.egg-info/dependency_links.txt
 asr_abtest.egg-info/entry_points.txt
 asr_abtest.egg-info/requires.txt
 asr_abtest.egg-info/top_level.txt
+asr_abtest/static/icon.svg
+asr_abtest/ui/app.py

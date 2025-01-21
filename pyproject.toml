@@ -23,4 +23,5 @@ asr-abtest-ui = "asr_abtest.ui.app:main"
 
 [tool.setuptools]
 packages = ["asr_abtest"]
-package-data = {"asr_abtest": ["static/*"]}
+package-dir = {"asr_abtest" = "asr_abtest"}
+package-data = {"asr_abtest" = ["static/*"]}

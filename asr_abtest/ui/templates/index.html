@@ -580,16 +580,78 @@
             border: 1px solid var(--border);
             margin-top: 10px;
         }
+        
+        .model-selector {
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .model-controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            align-items: center;
+            margin-top: 10px;
+        }
+        
+        .model-dropdown {
+            padding: 8px;
+            border-radius: 4px;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+            min-width: 200px;
+        }
+        
+        .model-section {
+            background-color: var(--bg-boxes);
+            border: 2px solid var(--border);
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .info-box {
+            background-color: var(--bg-primary);
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 4px;
+            border: 1px solid var(--border);
+        }
+        
+        .server-config {
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .url-controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            align-items: center;
+            margin-top: 10px;
+        }
+        
+        .url-input {
+            padding: 8px;
+            border-radius: 4px;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+            min-width: 300px;
+            font-family: monospace;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🎧 Audio Transcription Analysis</h1>
+        <h1>🎧 Transcript Analysis</h1>
         
         <div class="tabs">
             <button class="tab-button active" data-tab="info">ℹ️ Info</button>
+            <button class="tab-button" data-tab="model">🤖 Model</button>
+            <button class="tab-button" data-tab="transcribe-recording">🎙️ Record </button>
             <button class="tab-button" data-tab="transcribe">📄 Transcribe File</button>
-            <button class="tab-button" data-tab="transcribe-recording">🎙️ Record & Transcribe</button>
             <button class="tab-button" data-tab="compare">🔍 Compare</button>
         </div>
         
@@ -655,6 +717,36 @@
             </div>
         </div>
         
+        <!-- Model Tab -->
+        <div id="model" class="tab-content">
+            <div class="model-section">
+                <h2>ASR Model Selection</h2>
+                <p class="section-description">Select the ASR model to use for all transcriptions.</p>
+                
+                <div class="server-config">
+                    <label for="server-url">Server URL:</label>
+                    <div class="url-controls">
+                        <input type="text" id="server-url" class="url-input" value="http://localhost:8000">
+                        <button id="test-connection" class="btn btn-secondary">🔄 Test</button>
+                    </div>
+                </div>
+                
+                <div class="model-selector">
+                    <label for="model-select">Select ASR Model:</label>
+                    <div class="model-controls">
+                        <select id="model-select" class="model-dropdown">
+                            <option value="loading">Loading models...</option>
+                        </select>
+                        <button id="save-model" class="btn btn-primary">💾 Save</button>
+                    </div>
+                </div>
+                
+                <div id="model-info" class="info-box">
+                    <p>Currently selected model: <span id="current-model">Loading...</span></p>
+                </div>
+            </div>
+        </div>
+        
         <!-- Transcribe Tab -->
         <div id="transcribe" class="tab-content">
             <div class="upload-section">
@@ -668,7 +760,7 @@
                         </label>
                         <div id="transcribeAudioFileName" class="file-name"></div>
                     </div>
-                    <button type="submit" class="btn btn-primary">✅ Transcribe file</button>
+                    <button type="submit" class="btn btn-primary">🔤 Transcribe file</button>
                 </form>
             </div>
             
@@ -702,7 +794,7 @@
                     <audio id="recordedAudio" controls style="display: none;"></audio>
                     <button id="downloadRecording" class="btn btn-warning" style="display: none;">💾 Download Recording</button>
                 </div>
-                <button id="transcribeRecording" class="btn btn-primary" disabled>✅ Transcribe Recording</button>
+                <button id="transcribeRecording" class="btn btn-primary" disabled>🔤 Transcribe Recording</button>
             </div>
             
             <div id="recordingTranscriptionResult" style="display: none;">
@@ -751,7 +843,7 @@
                         </div>
                     </div>
                     <div class="action-buttons">
-                        <button type="submit" class="btn btn-primary">↔️ Compare Files</button>
+                        <button type="submit" class="btn btn-primary">↔️ Compare Transcripts</button>
                         <button type="button" id="startAnnotation" class="btn btn-secondary" style="display: none;">📝 Start Annotation</button>
                     </div>
                 </form>
@@ -845,10 +937,12 @@
             e.preventDefault();
             
             const formData = new FormData();
+            const modelId = document.getElementById('model-select').value;
             formData.append('audio', document.getElementById('transcribe-audio').files[0]);
+            formData.append('model_id', modelId);
             
             try {
-                const response = await fetch('/transcribe', {
+                const response = await fetch(`${getServerUrl()}/transcribe`, {
                     method: 'POST',
                     body: formData
                 });
@@ -1055,10 +1149,12 @@
         document.getElementById('transcribeRecording').addEventListener('click', async () => {
             const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
             const formData = new FormData();
+            const modelId = document.getElementById('model-select').value;
             formData.append('audio', audioBlob, 'recording.wav');
+            formData.append('model_id', modelId);
             
             try {
-                const response = await fetch('/transcribe', {
+                const response = await fetch(`${getServerUrl()}/transcribe`, {
                     method: 'POST',
                     body: formData
                 });
@@ -1302,6 +1398,77 @@
                 alert('Failed to start annotation. Please try again.');
             }
         };
+        
+        // Load available models when page loads
+        async function loadModels() {
+            try {
+                const serverUrl = document.getElementById('server-url').value;
+                const response = await fetch(`${serverUrl}/models`);
+                const data = await response.json();
+                const select = document.getElementById('model-select');
+                select.innerHTML = data.models.map(model => 
+                    `<option value="${model}">${model}</option>`
+                ).join('');
+                
+                // Get and display current model
+                const currentResponse = await fetch(`${serverUrl}/current-model`);
+                const currentData = await currentResponse.json();
+                document.getElementById('current-model').textContent = currentData.current_model;
+            } catch (error) {
+                console.error('Failed to load models:', error);
+                alert('Failed to connect to server. Please check the URL and try again.');
+            }
+        }
+        
+        // Update current model when selection changes
+        document.getElementById('model-select').addEventListener('change', async (e) => {
+            document.getElementById('current-model').textContent = e.target.value;
+        });
+        
+        // Handle model save
+        document.getElementById('save-model').addEventListener('click', async () => {
+            const modelId = document.getElementById('model-select').value;
+            const formData = new FormData();
+            formData.append('model_id', modelId);
+            
+            try {
+                const response = await fetch(`${getServerUrl()}/change-model`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    alert('Model changed successfully!');
+                } else {
+                    throw new Error(data.error || 'Failed to change model');
+                }
+            } catch (error) {
+                console.error('Failed to change model:', error);
+                alert('Failed to change model. Please try again.');
+            }
+        });
+        
+        // Test server connection
+        document.getElementById('test-connection').addEventListener('click', async () => {
+            try {
+                const serverUrl = document.getElementById('server-url').value;
+                const response = await fetch(`${serverUrl}/current-model`);
+                const data = await response.json();
+                alert('Connection successful! Current model: ' + data.current_model);
+            } catch (error) {
+                console.error('Connection test failed:', error);
+                alert('Failed to connect to server. Please check the URL and try again.');
+            }
+        });
+        
+        // Function to get server URL
+        function getServerUrl() {
+            return document.getElementById('server-url').value;
+        }
+        
+        // Load models when page loads
+        loadModels();
         
         // Make sure the info tab is active by default
         document.querySelector('.tab-button[data-tab="info"]').classList.add('active');
