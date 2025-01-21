@@ -1,0 +1,11 @@
+{
+  "supported_models": [
+    "NbAiLabBeta/nb-whisper-large-verbatim",
+    "NbAiLab/nb-whisper-large",
+    "NbAiLab/nb-whisper-tiny",
+    "NbAiLab/nb-whisper-tiny-verbatim",
+    "alexandrainst/roest-315m",
+    "syvai/hviske-v2",
+    "openai/whisper-large-v3-turbo"
+  ]
+}

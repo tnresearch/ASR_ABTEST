@@ -1,18 +1,44 @@
 from fastapi import FastAPI, UploadFile
+from fastapi.staticfiles import StaticFiles
 from transformers import pipeline
 import uvicorn
 import tempfile
 import os
+import argparse
 
 app = FastAPI()
+
+# Mount the static files directory
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
+# Update FastAPI app configuration to use the icon
+app = FastAPI(
+    title="ASR A/B Testing Framework",
+    description="Local transcription service using Whisper models",
+    version="0.1.0",
+    openapi_url="/api/v1/openapi.json",
+    docs_url="/docs",
+    redoc_url="/redoc",
+    favicon_url="/static/icon.svg"
+)
+
 transcriber = None
+
+def parse_args():
+    parser = argparse.ArgumentParser(description='Start ASR server with specified model')
+    parser.add_argument('--model', 
+                       type=str,
+                       default="NbAiLab/nb-whisper-tiny",
+                       help='Hugging Face model ID for ASR')
+    return parser.parse_args()
 
 @app.on_event("startup")
 async def startup_event():
     global transcriber
+    args = parse_args()
     transcriber = pipeline(
         "automatic-speech-recognition",
-        model="NbAiLab/nb-whisper-tiny",
+        model=args.model,
         # dont use cuda when running locally on mac
         #device="cuda" if os.environ.get("USE_CUDA", "1") == "1" else "cpu",
         # Enable word-level timestamps
@@ -63,6 +89,8 @@ async def transcribe_audio(file: UploadFile):
         os.unlink(temp_path)
 
 def main():
+    args = parse_args()
+    print(f"Starting ASR server with model: {args.model}")
     uvicorn.run(app, host="0.0.0.0", port=8000)
 
 if __name__ == "__main__":
