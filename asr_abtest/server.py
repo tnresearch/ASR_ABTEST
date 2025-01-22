@@ -14,6 +14,7 @@ from typing import Optional, Literal, List, Union
 from pydantic import BaseModel, Field
 from .benchmark import BenchmarkProcessor
 import logging
+import shutil
 
 app = FastAPI()
 
@@ -279,6 +280,21 @@ async def start_benchmark(
         
         if len(audio_files) != len(truth_files):
             raise ValueError("Number of audio files must match number of truth files")
+        
+        # Ensure temp directory exists
+        os.makedirs(benchmark_processor.temp_dir, exist_ok=True)
+        
+        # Clean up any existing files in temp directory
+        try:
+            for filename in os.listdir(benchmark_processor.temp_dir):
+                file_path = os.path.join(benchmark_processor.temp_dir, filename)
+                try:
+                    if os.path.isfile(file_path):
+                        os.unlink(file_path)
+                except Exception as e:
+                    logger.warning(f"Error deleting {file_path}: {e}")
+        except Exception as e:
+            logger.warning(f"Error cleaning temp directory: {e}")
         
         # Read all file contents immediately
         file_contents = []

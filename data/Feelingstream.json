@@ -27,12 +27,12 @@
       "end": 2.3
     },
     {
-      "text": "andet",
+      "text": "annet",
       "start": 2.3,
       "end": 2.92
     },
     {
-      "text": "få",
+      "text": "på",
       "start": 2.92,
       "end": 3.08
     },
@@ -42,7 +42,7 @@
       "end": 3.88
     },
     {
-      "text": "vov",
+      "text": "og",
       "start": 3.88,
       "end": 4.16
     },
@@ -52,7 +52,7 @@
       "end": 4.76
     },
     {
-      "text": "dorsk",
+      "text": "norsk",
       "start": 4.76,
       "end": 5.26
     },
@@ -112,11 +112,11 @@
       "end": 11.1
     }
   ],
-  "processed_date": "2025-01-22T16:08:59.021160",
-  "processing_duration_sec": 7.2489,
+  "processed_date": "2025-01-22T17:19:09.875769",
+  "processing_duration_sec": 7.4362,
   "file_size_kb": 198.52,
   "model_id": "NbAiLabBeta/nb-whisper-large-verbatim",
   "prompt": null,
   "temperature": 0,
-  "language": "no"
+  "language": "norwegian"
 }

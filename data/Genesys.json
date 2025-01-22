@@ -1,5 +1,5 @@
 {
-  "text": " hei jeg sier et eller annet på norsk og mitt norsk er ikke helt perfekt så derfor vil denne transcript være dårlig",
+  "text": " hei jeg sier et eller andet på dansk og mitt norsk er ikke helt perfekt så derfor vil denne transcript være dårlig",
   "words": [
     {
       "text": "hei",
@@ -27,7 +27,7 @@
       "end": 2.3
     },
     {
-      "text": "annet",
+      "text": "andet",
       "start": 2.3,
       "end": 2.92
     },
@@ -37,7 +37,7 @@
       "end": 3.08
     },
     {
-      "text": "norsk",
+      "text": "dansk",
       "start": 3.08,
       "end": 3.88
     },
@@ -112,11 +112,11 @@
       "end": 11.1
     }
   ],
-  "processed_date": "2025-01-22T16:08:59.021160",
-  "processing_duration_sec": 7.2489,
+  "processed_date": "2025-01-22T17:19:38.383232",
+  "processing_duration_sec": 6.6101,
   "file_size_kb": 198.52,
   "model_id": "NbAiLabBeta/nb-whisper-large-verbatim",
   "prompt": null,
   "temperature": 0,
-  "language": "no"
+  "language": "norwegian"
 }

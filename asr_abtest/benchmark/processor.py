@@ -29,8 +29,21 @@ class BenchmarkProcessor:
     
     def __del__(self):
         """Cleanup temporary files on shutdown"""
-        if os.path.exists(self.temp_dir):
-            shutil.rmtree(self.temp_dir)
+        try:
+            if os.path.exists(self.temp_dir):
+                for filename in os.listdir(self.temp_dir):
+                    file_path = os.path.join(self.temp_dir, filename)
+                    try:
+                        if os.path.isfile(file_path):
+                            os.unlink(file_path)
+                    except Exception as e:
+                        logger.warning(f"Error deleting {file_path}: {e}")
+                try:
+                    os.rmdir(self.temp_dir)
+                except Exception as e:
+                    logger.warning(f"Error removing temp directory: {e}")
+        except Exception as e:
+            logger.warning(f"Error during cleanup: {e}")
     
     def load_model(self, model_id: str):
         """Load model if needed"""
@@ -220,7 +233,7 @@ class BenchmarkProcessor:
                 "file": file_pair["audio"]["filename"],
                 "status": "completed",
                 "wer": wer,
-                "duration": processing_time,
+                "inference_time": processing_time,
                 "transcription": transcription,
                 "reference": reference_text,
                 "error_analysis": self.wer_calculator.analyze_errors(reference_text, transcription['text'])
@@ -240,7 +253,8 @@ class BenchmarkProcessor:
     def _save_results(self, benchmark_id: str) -> None:
         """Save benchmark results to file"""
         results = self.active_benchmarks[benchmark_id]
-        filename = f"benchmark_{benchmark_id}.json"
+        timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+        filename = f"benchmark_{timestamp}.json"
         path = os.path.join(self.results_dir, filename)
         
         with open(path, 'w') as f:
