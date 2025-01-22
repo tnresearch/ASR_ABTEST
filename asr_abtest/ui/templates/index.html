@@ -641,6 +641,52 @@
             min-width: 300px;
             font-family: monospace;
         }
+        
+        .transcription-options {
+            background-color: var(--bg-primary);
+            padding: 15px;
+            border-radius: 4px;
+            margin: 15px 0;
+            border: 1px solid var(--border);
+        }
+        
+        .option-group {
+            margin: 10px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            justify-content: center;
+        }
+        
+        .option-input {
+            padding: 8px;
+            border-radius: 4px;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+            min-width: 200px;
+        }
+        
+        .option-select {
+            padding: 8px;
+            border-radius: 4px;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+            min-width: 150px;
+        }
+        
+        .metadata-view {
+            background-color: var(--bg-primary);
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid var(--border);
+            margin-top: 10px;
+            font-family: monospace;
+            font-size: 0.9em;
+            white-space: pre-wrap;
+            color: var(--text-secondary);
+        }
     </style>
 </head>
 <body>
@@ -743,6 +789,10 @@
                 
                 <div id="model-info" class="info-box">
                     <p>Currently selected model: <span id="current-model">Loading...</span></p>
+                    <div id="model-capabilities" style="display: none;">
+                        <p>Supported formats: <span id="supported-formats">Loading...</span></p>
+                        <p>Available response formats: <span id="response-formats">Loading...</span></p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -751,12 +801,38 @@
         <div id="transcribe" class="tab-content">
             <div class="upload-section">
                 <h2>Upload Audio for Transcription</h2>
-                <p class="section-description">Upload a Wav-file to make a test transcript.</p>
+                <p class="section-description">Upload an audio file to make a test transcript.</p>
+                <div class="transcription-options">
+                    <div class="option-group">
+                        <label for="transcribe-language">Language (optional):</label>
+                        <input type="text" id="transcribe-language" class="option-input" placeholder="e.g., en, no">
+                    </div>
+                    <div class="option-group">
+                        <label for="transcribe-prompt">Prompt (optional):</label>
+                        <input type="text" id="transcribe-prompt" class="option-input" placeholder="Guide the model's style">
+                    </div>
+                    <div class="option-group">
+                        <label for="transcribe-temperature">Temperature:</label>
+                        <input type="range" id="transcribe-temperature" min="0" max="1" step="0.1" value="0">
+                        <span id="temperature-value">0.0</span>
+                    </div>
+                    <div class="option-group">
+                        <label for="transcribe-format">Response Format:</label>
+                        <select id="transcribe-format" class="option-select">
+                            <option value="json">JSON</option>
+                            <option value="text">Text</option>
+                            <option value="verbose_json">Verbose JSON</option>
+                            <option value="srt">SRT</option>
+                            <option value="vtt">VTT</option>
+                        </select>
+                    </div>
+                </div>
                 <form id="transcribeForm">
                     <div>
                         <label class="btn btn-secondary" for="transcribe-audio">
-                            🎤 Choose Audio File (WAV)
-                            <input type="file" id="transcribe-audio" name="audio" accept=".wav" required>
+                            🎤 Choose Audio File
+                            <input type="file" id="transcribe-audio" name="audio" 
+                               accept=".wav,.mp3,.mp4,.mpeg,.mpga,.m4a,.webm" required>
                         </label>
                         <div id="transcribeAudioFileName" class="file-name"></div>
                     </div>
@@ -932,24 +1008,74 @@
             });
         });
         
+        // Load available models when page loads
+        async function loadModels() {
+            try {
+                const serverUrl = document.getElementById('server-url').value;
+                const response = await fetch(`${serverUrl}/models`);
+                const data = await response.json();
+                const select = document.getElementById('model-select');
+                select.innerHTML = data.models.map(model => 
+                    `<option value="${model}">${model}</option>`
+                ).join('');
+                
+                // Get and display current model
+                const currentResponse = await fetch(`${serverUrl}/current-model`);
+                const currentData = await currentResponse.json();
+                document.getElementById('current-model').textContent = currentData.current_model;
+                
+                // Get server capabilities
+                const configResponse = await fetch(`${serverUrl}/audio/config`);
+                const configData = await configResponse.json();
+                document.getElementById('supported-formats').textContent = configData.supported_formats.join(', ');
+                document.getElementById('response-formats').textContent = configData.response_formats.join(', ');
+                document.getElementById('model-capabilities').style.display = 'block';
+                
+                // Update response format dropdowns
+                const formatSelects = document.querySelectorAll('.option-select');
+                formatSelects.forEach(select => {
+                    select.innerHTML = configData.response_formats.map(format => 
+                        `<option value="${format}">${format.toUpperCase()}</option>`
+                    ).join('');
+                });
+            } catch (error) {
+                console.error('Failed to load models:', error);
+                alert('Failed to connect to server. Please check the URL and try again.');
+            }
+        }
+        
+        // Update temperature value display
+        document.getElementById('transcribe-temperature').addEventListener('input', (e) => {
+            document.getElementById('temperature-value').textContent = e.target.value;
+        });
+        
         // Transcribe functionality
         document.getElementById('transcribeForm').onsubmit = async (e) => {
             e.preventDefault();
             
             const formData = new FormData();
             const modelId = document.getElementById('model-select').value;
-            formData.append('audio', document.getElementById('transcribe-audio').files[0]);
+            const language = document.getElementById('transcribe-language').value;
+            const prompt = document.getElementById('transcribe-prompt').value;
+            const temperature = document.getElementById('transcribe-temperature').value;
+            const responseFormat = document.getElementById('transcribe-format').value;
+            
+            formData.append('file', document.getElementById('transcribe-audio').files[0]);
             formData.append('model_id', modelId);
+            if (language) formData.append('language', language);
+            if (prompt) formData.append('prompt', prompt);
+            formData.append('temperature', temperature);
+            formData.append('response_format', responseFormat);
             
             try {
-                const response = await fetch(`${getServerUrl()}/transcribe`, {
+                const response = await fetch(`${getServerUrl()}/audio/transcriptions`, {
                     method: 'POST',
                     body: formData
                 });
                 
                 const data = await response.json();
                 
-                if (data.success) {
+                if (data.words) {  // Check for words array instead of success flag
                     const transcriptHtml = data.words.map(word => 
                         `<span class="word" data-start="${word.start}" data-end="${word.end}">${word.text}</span>`
                     ).join(' ');
@@ -969,6 +1095,13 @@
                         a.click();
                         URL.revokeObjectURL(url);
                     };
+                } else if (data.error) {
+                    throw new Error(data.error);
+                } else {
+                    // Handle text-only response
+                    document.getElementById('result-text').innerHTML = data.text || data;
+                    document.getElementById('result-json').textContent = JSON.stringify(data, null, 2);
+                    document.getElementById('transcriptionResult').style.display = 'block';
                 }
             } catch (error) {
                 console.error('Transcription failed:', error);
@@ -1150,41 +1283,40 @@
             const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
             const formData = new FormData();
             const modelId = document.getElementById('model-select').value;
-            formData.append('audio', audioBlob, 'recording.wav');
+            const language = document.getElementById('transcribe-language').value;
+            const prompt = document.getElementById('transcribe-prompt').value;
+            const temperature = document.getElementById('transcribe-temperature').value;
+            const responseFormat = document.getElementById('transcribe-format').value;
+            
+            formData.append('file', audioBlob, 'recording.wav');
             formData.append('model_id', modelId);
+            if (language) formData.append('language', language);
+            if (prompt) formData.append('prompt', prompt);
+            formData.append('temperature', temperature);
+            formData.append('response_format', responseFormat);
             
             try {
-                const response = await fetch(`${getServerUrl()}/transcribe`, {
+                const response = await fetch(`${getServerUrl()}/audio/transcriptions`, {
                     method: 'POST',
                     body: formData
                 });
                 
                 const data = await response.json();
                 
-                if (data.success) {
-                    // Update formatted text
+                if (data.words) {
                     const transcriptHtml = data.words.map(word => 
                         `<span class="word" data-start="${word.start}" data-end="${word.end}">${word.text}</span>`
                     ).join(' ');
                     document.getElementById('recording-result-text').innerHTML = transcriptHtml;
-                    
-                    // Update raw JSON
                     document.getElementById('recording-result-json').textContent = JSON.stringify(data, null, 2);
-                    
-                    // Show result section
                     document.getElementById('recordingTranscriptionResult').style.display = 'block';
-                    
-                    // Enable download button
-                    document.getElementById('downloadRecordingTranscript').onclick = () => {
-                        const blob = new Blob([JSON.stringify(data, null, 2)], 
-                            {type: 'application/json'});
-                        const url = URL.createObjectURL(blob);
-                        const a = document.createElement('a');
-                        a.href = url;
-                        a.download = 'recording_transcript.json';
-                        a.click();
-                        URL.revokeObjectURL(url);
-                    };
+                } else if (data.error) {
+                    throw new Error(data.error);
+                } else {
+                    // Handle text-only response
+                    document.getElementById('recording-result-text').innerHTML = data.text || data;
+                    document.getElementById('recording-result-json').textContent = JSON.stringify(data, null, 2);
+                    document.getElementById('recordingTranscriptionResult').style.display = 'block';
                 }
             } catch (error) {
                 console.error('Transcription failed:', error);
@@ -1398,69 +1530,6 @@
                 alert('Failed to start annotation. Please try again.');
             }
         };
-        
-        // Load available models when page loads
-        async function loadModels() {
-            try {
-                const serverUrl = document.getElementById('server-url').value;
-                const response = await fetch(`${serverUrl}/models`);
-                const data = await response.json();
-                const select = document.getElementById('model-select');
-                select.innerHTML = data.models.map(model => 
-                    `<option value="${model}">${model}</option>`
-                ).join('');
-                
-                // Get and display current model
-                const currentResponse = await fetch(`${serverUrl}/current-model`);
-                const currentData = await currentResponse.json();
-                document.getElementById('current-model').textContent = currentData.current_model;
-            } catch (error) {
-                console.error('Failed to load models:', error);
-                alert('Failed to connect to server. Please check the URL and try again.');
-            }
-        }
-        
-        // Update current model when selection changes
-        document.getElementById('model-select').addEventListener('change', async (e) => {
-            document.getElementById('current-model').textContent = e.target.value;
-        });
-        
-        // Handle model save
-        document.getElementById('save-model').addEventListener('click', async () => {
-            const modelId = document.getElementById('model-select').value;
-            const formData = new FormData();
-            formData.append('model_id', modelId);
-            
-            try {
-                const response = await fetch(`${getServerUrl()}/change-model`, {
-                    method: 'POST',
-                    body: formData
-                });
-                
-                const data = await response.json();
-                if (data.success) {
-                    alert('Model changed successfully!');
-                } else {
-                    throw new Error(data.error || 'Failed to change model');
-                }
-            } catch (error) {
-                console.error('Failed to change model:', error);
-                alert('Failed to change model. Please try again.');
-            }
-        });
-        
-        // Test server connection
-        document.getElementById('test-connection').addEventListener('click', async () => {
-            try {
-                const serverUrl = document.getElementById('server-url').value;
-                const response = await fetch(`${serverUrl}/current-model`);
-                const data = await response.json();
-                alert('Connection successful! Current model: ' + data.current_model);
-            } catch (error) {
-                console.error('Connection test failed:', error);
-                alert('Failed to connect to server. Please check the URL and try again.');
-            }
-        });
         
         // Function to get server URL
         function getServerUrl() {
