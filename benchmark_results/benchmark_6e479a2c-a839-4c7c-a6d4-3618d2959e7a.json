@@ -1,0 +1,281 @@
+{
+  "status": "completed",
+  "progress": 100,
+  "current_file": null,
+  "total_files": 2,
+  "results": [
+    {
+      "file": "Feelingstream.wav",
+      "status": "completed",
+      "wer": 0.0,
+      "duration": 7.249346971511841,
+      "transcription": {
+        "text": " hei jeg sier et eller annet p\u00e5 norsk og mitt norsk er ikke helt perfekt s\u00e5 derfor vil denne transcript v\u00e6re d\u00e5rlig",
+        "words": [
+          {
+            "text": "hei",
+            "start": 0.0,
+            "end": 0.8
+          },
+          {
+            "text": "jeg",
+            "start": 0.8,
+            "end": 0.84
+          },
+          {
+            "text": "sier",
+            "start": 0.84,
+            "end": 1.86
+          },
+          {
+            "text": "et",
+            "start": 1.86,
+            "end": 2.08
+          },
+          {
+            "text": "eller",
+            "start": 2.08,
+            "end": 2.3
+          },
+          {
+            "text": "annet",
+            "start": 2.3,
+            "end": 2.92
+          },
+          {
+            "text": "p\u00e5",
+            "start": 2.92,
+            "end": 3.08
+          },
+          {
+            "text": "norsk",
+            "start": 3.08,
+            "end": 3.88
+          },
+          {
+            "text": "og",
+            "start": 3.88,
+            "end": 4.16
+          },
+          {
+            "text": "mitt",
+            "start": 4.16,
+            "end": 4.76
+          },
+          {
+            "text": "norsk",
+            "start": 4.76,
+            "end": 5.26
+          },
+          {
+            "text": "er",
+            "start": 5.26,
+            "end": 5.36
+          },
+          {
+            "text": "ikke",
+            "start": 5.36,
+            "end": 5.56
+          },
+          {
+            "text": "helt",
+            "start": 5.56,
+            "end": 5.84
+          },
+          {
+            "text": "perfekt",
+            "start": 5.84,
+            "end": 6.66
+          },
+          {
+            "text": "s\u00e5",
+            "start": 6.66,
+            "end": 7.38
+          },
+          {
+            "text": "derfor",
+            "start": 7.38,
+            "end": 8.16
+          },
+          {
+            "text": "vil",
+            "start": 8.16,
+            "end": 9.08
+          },
+          {
+            "text": "denne",
+            "start": 9.08,
+            "end": 9.58
+          },
+          {
+            "text": "transcript",
+            "start": 9.58,
+            "end": 10.22
+          },
+          {
+            "text": "v\u00e6re",
+            "start": 10.22,
+            "end": 10.6
+          },
+          {
+            "text": "d\u00e5rlig",
+            "start": 10.6,
+            "end": 11.1
+          }
+        ]
+      },
+      "reference": " hei jeg sier et eller annet p\u00e5 norsk og mitt norsk er ikke helt perfekt s\u00e5 derfor vil denne transcript v\u00e6re d\u00e5rlig",
+      "error_analysis": {
+        "total_errors": 460,
+        "total_words": 22,
+        "substitutions": 0,
+        "deletions": 230,
+        "insertions": 230,
+        "error_rate": 20.90909090909091,
+        "accuracy": -19.90909090909091
+      }
+    },
+    {
+      "file": "Genesys.wav",
+      "status": "completed",
+      "wer": 0.0,
+      "duration": 6.512981176376343,
+      "transcription": {
+        "text": " hei jeg sier et eller annet p\u00e5 norsk og mitt norsk er ikke helt perfekt s\u00e5 derfor vil denne transcript v\u00e6re d\u00e5rlig",
+        "words": [
+          {
+            "text": "hei",
+            "start": 0.0,
+            "end": 0.8
+          },
+          {
+            "text": "jeg",
+            "start": 0.8,
+            "end": 0.84
+          },
+          {
+            "text": "sier",
+            "start": 0.84,
+            "end": 1.86
+          },
+          {
+            "text": "et",
+            "start": 1.86,
+            "end": 2.08
+          },
+          {
+            "text": "eller",
+            "start": 2.08,
+            "end": 2.3
+          },
+          {
+            "text": "annet",
+            "start": 2.3,
+            "end": 2.92
+          },
+          {
+            "text": "p\u00e5",
+            "start": 2.92,
+            "end": 3.08
+          },
+          {
+            "text": "norsk",
+            "start": 3.08,
+            "end": 3.88
+          },
+          {
+            "text": "og",
+            "start": 3.88,
+            "end": 4.16
+          },
+          {
+            "text": "mitt",
+            "start": 4.16,
+            "end": 4.76
+          },
+          {
+            "text": "norsk",
+            "start": 4.76,
+            "end": 5.26
+          },
+          {
+            "text": "er",
+            "start": 5.26,
+            "end": 5.36
+          },
+          {
+            "text": "ikke",
+            "start": 5.36,
+            "end": 5.56
+          },
+          {
+            "text": "helt",
+            "start": 5.56,
+            "end": 5.84
+          },
+          {
+            "text": "perfekt",
+            "start": 5.84,
+            "end": 6.66
+          },
+          {
+            "text": "s\u00e5",
+            "start": 6.66,
+            "end": 7.38
+          },
+          {
+            "text": "derfor",
+            "start": 7.38,
+            "end": 8.16
+          },
+          {
+            "text": "vil",
+            "start": 8.16,
+            "end": 9.08
+          },
+          {
+            "text": "denne",
+            "start": 9.08,
+            "end": 9.58
+          },
+          {
+            "text": "transcript",
+            "start": 9.58,
+            "end": 10.22
+          },
+          {
+            "text": "v\u00e6re",
+            "start": 10.22,
+            "end": 10.6
+          },
+          {
+            "text": "d\u00e5rlig",
+            "start": 10.6,
+            "end": 11.1
+          }
+        ]
+      },
+      "reference": " hei jeg sier et eller annet p\u00e5 norsk og mitt norsk er ikke helt perfekt s\u00e5 derfor vil denne transcript v\u00e6re d\u00e5rlig",
+      "error_analysis": {
+        "total_errors": 460,
+        "total_words": 22,
+        "substitutions": 0,
+        "deletions": 230,
+        "insertions": 230,
+        "error_rate": 20.90909090909091,
+        "accuracy": -19.90909090909091
+      }
+    }
+  ],
+  "config": {
+    "format": "json",
+    "pattern": "{audio_file}.json",
+    "model_id": "NbAiLabBeta/nb-whisper-large-verbatim",
+    "language": "norwegian",
+    "prompt": "",
+    "temperature": 0.0,
+    "response_format": "json"
+  },
+  "start_time": "2025-01-22T16:10:53.283269",
+  "end_time": "2025-01-22T16:11:07.045597"
+}

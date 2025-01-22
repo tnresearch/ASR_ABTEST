@@ -1,135 +1,122 @@
 {
-  "success": true,
+  "text": " hei jeg sier et eller annet på norsk og mitt norsk er ikke helt perfekt så derfor vil denne transcript være dårlig",
   "words": [
     {
-      "end": 0.44,
+      "text": "hei",
       "start": 0,
-      "text": "For"
+      "end": 0.8
     },
     {
-      "end": 2.7,
-      "start": 0.44,
-      "text": "å"
+      "text": "jeg",
+      "start": 0.8,
+      "end": 0.84
     },
     {
-      "end": 3,
-      "start": 2.7,
-      "text": "finne"
+      "text": "sier",
+      "start": 0.84,
+      "end": 1.86
     },
     {
-      "end": 3.44,
-      "start": 3,
-      "text": "ut"
+      "text": "et",
+      "start": 1.86,
+      "end": 2.08
     },
     {
-      "end": 4.48,
-      "start": 3.44,
-      "text": "av"
+      "text": "eller",
+      "start": 2.08,
+      "end": 2.3
     },
     {
-      "end": 6.6,
-      "start": 4.48,
-      "text": "modellen"
+      "text": "annet",
+      "start": 2.3,
+      "end": 2.92
     },
     {
-      "end": 7.52,
-      "start": 6.6,
-      "text": "kan"
+      "text": "på",
+      "start": 2.92,
+      "end": 3.08
     },
     {
-      "end": 7.94,
-      "start": 7.52,
-      "text": "forstå"
+      "text": "norsk",
+      "start": 3.08,
+      "end": 3.88
     },
     {
-      "end": 8.28,
-      "start": 7.94,
-      "text": "hva"
+      "text": "og",
+      "start": 3.88,
+      "end": 4.16
     },
     {
-      "end": 8.28,
-      "start": 8.28,
-      "text": "jeg"
+      "text": "mitt",
+      "start": 4.16,
+      "end": 4.76
     },
     {
-      "end": 8.84,
-      "start": 8.28,
-      "text": "sier."
+      "text": "norsk",
+      "start": 4.76,
+      "end": 5.26
     },
     {
-      "end": 9.02,
-      "start": 8.84,
-      "text": "For"
+      "text": "er",
+      "start": 5.26,
+      "end": 5.36
     },
     {
-      "end": 9.3,
-      "start": 9.02,
-      "text": "jeg"
+      "text": "ikke",
+      "start": 5.36,
+      "end": 5.56
     },
     {
-      "end": 10.2,
-      "start": 9.3,
-      "text": "har"
+      "text": "helt",
+      "start": 5.56,
+      "end": 5.84
     },
     {
-      "end": 10.46,
-      "start": 10.2,
-      "text": "laga"
+      "text": "perfekt",
+      "start": 5.84,
+      "end": 6.66
     },
     {
-      "end": 12.92,
-      "start": 10.46,
-      "text": "portkast,"
+      "text": "så",
+      "start": 6.66,
+      "end": 7.38
     },
     {
-      "end": 12.92,
-      "start": 12.92,
-      "text": "og"
+      "text": "derfor",
+      "start": 7.38,
+      "end": 8.16
     },
     {
-      "end": 12.98,
-      "start": 12.92,
-      "text": "det"
+      "text": "vil",
+      "start": 8.16,
+      "end": 9.08
     },
     {
-      "end": 12.98,
-      "start": 12.98,
-      "text": "er"
+      "text": "denne",
+      "start": 9.08,
+      "end": 9.58
     },
     {
-      "end": 13.44,
-      "start": 12.98,
-      "text": "en"
+      "text": "transcript",
+      "start": 9.58,
+      "end": 10.22
     },
     {
-      "end": 13.74,
-      "start": 13.44,
-      "text": "riktig"
+      "text": "være",
+      "start": 10.22,
+      "end": 10.6
     },
     {
-      "end": 14,
-      "start": 13.74,
-      "text": "god"
-    },
-    {
-      "end": 16.14,
-      "start": 14,
-      "text": "bortkast,"
-    },
-    {
-      "end": 16.24,
-      "start": 16.14,
-      "text": "som"
-    },
-    {
-      "end": 16.44,
-      "start": 16.24,
-      "text": "slår"
-    },
-    {
-      "end": null,
-      "start": 16.44,
-      "text": "da."
+      "text": "dårlig",
+      "start": 10.6,
+      "end": 11.1
     }
-  ]
+  ],
+  "processed_date": "2025-01-22T16:08:59.021160",
+  "processing_duration_sec": 7.2489,
+  "file_size_kb": 198.52,
+  "model_id": "NbAiLabBeta/nb-whisper-large-verbatim",
+  "prompt": null,
+  "temperature": 0,
+  "language": "no"
 }
