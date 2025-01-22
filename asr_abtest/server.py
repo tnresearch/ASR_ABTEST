@@ -17,8 +17,12 @@ import logging
 import shutil
 from io import BytesIO
 import pandas as pd
+from fastapi.staticfiles import StaticFiles
 
 app = FastAPI()
+
+# Mount static files directory
+app.mount("/static", StaticFiles(directory="asr_abtest/ui/static"), name="static")
 
 # Enable CORS
 app.add_middleware(
@@ -245,7 +249,10 @@ async def startup_event():
     """Print all registered routes on startup"""
     print("\nRegistered routes:")
     for route in app.routes:
-        print(f"{route.methods} {route.path}")
+        if hasattr(route, "methods"):
+            print(f"{route.methods} {route.path}")
+        elif hasattr(route, "path"):
+            print(f"STATIC {route.path}")
     print()
 
 def main():
