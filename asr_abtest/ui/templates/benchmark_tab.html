@@ -1,0 +1,45 @@
+<div id="benchmark" class="tab-content">
+    <div class="benchmark-section">
+        <h2>Batch Processing</h2>
+        
+        <!-- File Upload -->
+        <div class="file-upload-section">
+            <label class="file-input-label">
+                Select Files
+                <input type="file" id="batch-files" multiple accept=".wav,.json" style="display: none;">
+            </label>
+            <div id="selected-files"></div>
+        </div>
+
+        <!-- Progress -->
+        <div class="progress-section" style="display: none;">
+            <div class="progress-bar">
+                <div class="progress-fill"></div>
+            </div>
+            <div class="progress-text">Processing file 0/0</div>
+        </div>
+
+        <!-- Results -->
+        <div class="results-section" style="display: none;">
+            <h3>Benchmark Results</h3>
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <div class="stat-label">Average WER</div>
+                    <div class="stat-value" id="avg-wer">-</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Files Processed</div>
+                    <div class="stat-value" id="files-processed">-</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Total Duration</div>
+                    <div class="stat-value" id="total-duration">-</div>
+                </div>
+            </div>
+            
+            <div class="results-table">
+                <!-- Results table will be populated dynamically -->
+            </div>
+        </div>
+    </div>
+</div> 

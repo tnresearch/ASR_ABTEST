@@ -1,1 +1,7 @@
 *.DS_Store
+benchmark_results/
+*.pyc
+*.pyo
+*.pyd
+*.pyw
+*.pyz

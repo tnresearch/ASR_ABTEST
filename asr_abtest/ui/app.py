@@ -5,6 +5,8 @@ import requests
 from datetime import datetime
 from pathlib import Path
 import wave
+from asr_abtest.benchmark.batch_runner import BatchRunner
+from asr_abtest.benchmark.results import BenchmarkResults
 
 app = Flask(__name__, 
            static_folder='static',
@@ -224,6 +226,45 @@ def serve_result(filename):
     except Exception as e:
         print(f"Error serving result file: {e}")
         return jsonify({'error': str(e)}), 404
+
+batch_runner = BatchRunner()
+benchmark_results = BenchmarkResults()
+
+@app.route('/benchmark/process', methods=['POST'])
+async def process_benchmark():
+    try:
+        files = []
+        for audio, reference in zip(
+            request.files.getlist('audio_files[]'),
+            request.files.getlist('reference_files[]')
+        ):
+            files.append({
+                'audio': {
+                    'filename': audio.filename,
+                    'content': audio.read()
+                },
+                'truth': {
+                    'filename': reference.filename,
+                    'content': reference.read()
+                }
+            })
+        
+        model_id = request.form['model_id']
+        results = await batch_runner.run_batch(files, model_id)
+        
+        # Save results
+        results_file = benchmark_results.save_results(results)
+        
+        return jsonify({
+            'success': True,
+            **results,
+            'results_file': results_file
+        })
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
 
 def main():
     app.run(host='127.0.0.1', port=7860, debug=True)
