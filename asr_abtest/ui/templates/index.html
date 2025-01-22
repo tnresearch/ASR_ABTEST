@@ -1203,12 +1203,12 @@
                                 <tr>
                                     <th>File</th>
                                     <th>WER</th>
+                                    <th>CER</th>
                                     <th>Inference Time</th>
                                     <th>Status</th>
                                     <th>Substitutions</th>
                                     <th>Deletions</th>
                                     <th>Insertions</th>
-                                    <th>Accuracy</th>
                                 </tr>
                             </thead>
                             <tbody></tbody>
@@ -1981,6 +1981,9 @@
             const averageWer = completedResults.length > 0 
                 ? completedResults.reduce((sum, r) => sum + r.wer, 0) / completedResults.length 
                 : 0;
+            const averageCer = completedResults.length > 0
+                ? completedResults.reduce((sum, r) => sum + r.error_analysis.cer, 0) / completedResults.length
+                : 0;
             const totalTime = completedResults.reduce((sum, r) => sum + r.inference_time, 0);
             
             // Update summary statistics
@@ -1989,21 +1992,36 @@
                 <h4>Summary</h4>
                 <p>Total Files: ${totalFiles}</p>
                 <p>Average WER: ${averageWer.toFixed(4)}</p>
+                <p>Average CER: ${averageCer.toFixed(4)}</p>
                 <p>Total Inference Time: ${totalTime.toFixed(2)} s</p>
             `;
             
             // Store results for download
             window.currentBenchmarkResults = results;
             
-            // Add download button below summary stats
-            const downloadButton = document.createElement('button');
-            downloadButton.onclick = downloadBenchmarkResults;
-            downloadButton.className = 'btn btn-secondary';
-            downloadButton.style.backgroundColor = '#6c757d';  // Grey color
-            downloadButton.style.marginTop = '20px';
-            downloadButton.style.display = 'block';
-            downloadButton.innerHTML = '💾 Download JSON';
-            summaryStats.parentNode.insertBefore(downloadButton, summaryStats.nextSibling);
+            // Add download buttons container
+            const downloadButtons = document.createElement('div');
+            downloadButtons.style.display = 'flex';
+            downloadButtons.style.gap = '10px';
+            downloadButtons.style.marginTop = '20px';
+            
+            // JSON download button
+            const jsonButton = document.createElement('button');
+            jsonButton.onclick = downloadBenchmarkResults;
+            jsonButton.className = 'btn btn-secondary';
+            jsonButton.style.backgroundColor = '#6c757d';
+            jsonButton.innerHTML = '💾 Download JSON';
+            
+            // Excel download button
+            const excelButton = document.createElement('button');
+            excelButton.onclick = downloadBenchmarkExcel;
+            excelButton.className = 'btn btn-secondary';
+            excelButton.style.backgroundColor = '#6c757d';
+            excelButton.innerHTML = '📊 Download Excel';
+            
+            downloadButtons.appendChild(jsonButton);
+            downloadButtons.appendChild(excelButton);
+            summaryStats.parentNode.insertBefore(downloadButtons, summaryStats.nextSibling);
             
             // Update detailed results table
             const tbody = document.querySelector('#results-table tbody');
@@ -2012,24 +2030,24 @@
             thead.innerHTML = `
                 <th>File</th>
                 <th>WER</th>
+                <th>CER</th>
                 <th>Inference Time</th>
                 <th>Status</th>
                 <th>Substitutions</th>
                 <th>Deletions</th>
                 <th>Insertions</th>
-                <th>Accuracy</th>
             `;
             
             tbody.innerHTML = results.map(result => `
                 <tr>
                     <td>${result.file}</td>
                     <td>${result.status === 'completed' ? result.wer.toFixed(4) : 'N/A'}</td>
+                    <td>${result.status === 'completed' ? result.error_analysis.cer.toFixed(4) : 'N/A'}</td>
                     <td>${result.status === 'completed' ? result.inference_time.toFixed(2) : 'N/A'} s</td>
                     <td>${result.status}</td>
                     <td>${result.status === 'completed' ? result.error_analysis.substitutions : 'N/A'}</td>
                     <td>${result.status === 'completed' ? result.error_analysis.deletions : 'N/A'}</td>
                     <td>${result.status === 'completed' ? result.error_analysis.insertions : 'N/A'}</td>
-                    <td>${result.status === 'completed' ? result.error_analysis.accuracy.toFixed(2) : 'N/A'}%</td>
                 </tr>
             `).join('');
             
@@ -2119,6 +2137,59 @@
         document.getElementById('temperature').addEventListener('input', updateSettingsDisplay);
         document.getElementById('response-format').addEventListener('change', updateSettingsDisplay);
         document.getElementById('prompt').addEventListener('input', updateSettingsDisplay);
+        
+        async function downloadBenchmarkExcel() {
+            try {
+                if (!window.currentBenchmarkResults) {
+                    alert('No benchmark results available to download');
+                    return;
+                }
+                
+                const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+                const filename = `benchmark_${timestamp}.xlsx`;
+                
+                // Create rows for Excel
+                const rows = window.currentBenchmarkResults
+                    .filter(result => result.status === 'completed')
+                    .map(result => ({
+                        file: result.file,
+                        transcription: result.transcription.text,
+                        reference: result.reference,
+                        wer: result.wer,
+                        cer: result.error_analysis.cer,
+                        inference_time: result.inference_time,
+                        substitutions: result.error_analysis.substitutions,
+                        deletions: result.error_analysis.deletions,
+                        insertions: result.error_analysis.insertions,
+                        model_id: document.getElementById('model-select').value,
+                        language: document.getElementById('language').value,
+                        prompt: document.getElementById('prompt').value || '',
+                        temperature: document.getElementById('temperature').value,
+                        response_format: document.getElementById('response-format').value
+                    }));
+                
+                const response = await fetch(`${getServerUrl()}/download/excel`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(rows)
+                });
+                
+                const blob = await response.blob();
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            } catch (error) {
+                console.error('Failed to download Excel:', error);
+                alert('Failed to download Excel file. Please try again.');
+            }
+        }
     </script>
 </body>
 </html> 

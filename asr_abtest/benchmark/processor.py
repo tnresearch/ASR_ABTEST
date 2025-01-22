@@ -10,6 +10,7 @@ import torch
 from transformers import pipeline, AutoTokenizer
 import shutil
 import logging
+import pandas as pd
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -254,8 +255,40 @@ class BenchmarkProcessor:
         """Save benchmark results to file"""
         results = self.active_benchmarks[benchmark_id]
         timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-        filename = f"benchmark_{timestamp}.json"
-        path = os.path.join(self.results_dir, filename)
+        base_filename = f"benchmark_{timestamp}"
         
-        with open(path, 'w') as f:
-            json.dump(results, f, indent=2) 
+        # Save JSON
+        json_path = os.path.join(self.results_dir, f"{base_filename}.json")
+        with open(json_path, 'w') as f:
+            json.dump(results, f, indent=2)
+        
+        # Create DataFrame for Excel
+        rows = []
+        for result in results['results']:
+            if result['status'] == 'completed':
+                row = {
+                    'file': result['file'],
+                    'transcription': result['transcription']['text'],
+                    'reference': result['reference'],
+                    'wer': result['wer'],
+                    'cer': result['error_analysis']['cer'],
+                    'inference_time': result['inference_time'],
+                    'substitutions': result['error_analysis']['substitutions'],
+                    'deletions': result['error_analysis']['deletions'],
+                    'insertions': result['error_analysis']['insertions'],
+                    'model_id': results['config']['model_id'],
+                    'language': results['config'].get('language', ''),
+                    'prompt': results['config'].get('prompt', ''),
+                    'temperature': results['config'].get('temperature', 0.0),
+                    'response_format': results['config'].get('response_format', 'json')
+                }
+                rows.append(row)
+        
+        # Create and save Excel file
+        if rows:
+            df = pd.DataFrame(rows)
+            excel_path = os.path.join(self.results_dir, f"{base_filename}.xlsx")
+            df.to_excel(excel_path, index=False)
+            logger.info(f"Results saved to {json_path} and {excel_path}")
+        else:
+            logger.warning("No completed results to save to Excel") 

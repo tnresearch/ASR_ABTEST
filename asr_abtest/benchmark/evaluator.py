@@ -28,10 +28,34 @@ class WERCalculator:
         return d[len(hyp_words)][len(ref_words)] / len(ref_words)
     
     @staticmethod
-    def analyze_errors(reference: str, hypothesis: str) -> Dict:
+    def analyze_errors(reference: str, hypothesis: str, include_cer: bool = True) -> Dict:
         """Analyze types of errors in the transcription"""
         ref_words = reference.lower().split()
         hyp_words = hypothesis.lower().split()
+        
+        # Calculate character-level errors if requested
+        cer = 0
+        if include_cer:
+            ref_chars = list(reference.lower())
+            hyp_chars = list(hypothesis.lower())
+            d = [[0 for _ in range(len(ref_chars) + 1)] 
+                 for _ in range(len(hyp_chars) + 1)]
+            
+            # Initialize first row and column
+            for i in range(len(hyp_chars) + 1):
+                d[i][0] = i
+            for j in range(len(ref_chars) + 1):
+                d[0][j] = j
+            
+            # Fill matrix
+            for i in range(1, len(hyp_chars) + 1):
+                for j in range(1, len(ref_chars) + 1):
+                    if hyp_chars[i-1] == ref_chars[j-1]:
+                        d[i][j] = d[i-1][j-1]
+                    else:
+                        d[i][j] = min(d[i-1][j], d[i][j-1], d[i-1][j-1]) + 1
+            
+            cer = d[len(hyp_chars)][len(ref_chars)] / len(ref_chars) if ref_chars else 1.0
         
         # Initialize counters
         substitutions = 0
@@ -78,5 +102,5 @@ class WERCalculator:
             "deletions": deletions,
             "insertions": insertions,
             "error_rate": total_errors / total_words if total_words > 0 else 1.0,
-            "accuracy": 1 - (total_errors / total_words if total_words > 0 else 1.0)
+            "cer": cer
         } 

@@ -1,5 +1,5 @@
 import json
-from fastapi import FastAPI, UploadFile, Form, HTTPException, File
+from fastapi import FastAPI, UploadFile, Form, HTTPException, File, Response
 from fastapi.middleware.cors import CORSMiddleware
 import torch
 from transformers import pipeline
@@ -15,6 +15,8 @@ from pydantic import BaseModel, Field
 from .benchmark import BenchmarkProcessor
 import logging
 import shutil
+from io import BytesIO
+import pandas as pd
 
 app = FastAPI()
 
@@ -357,6 +359,25 @@ async def get_languages():
             return json.load(f)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to load languages: {str(e)}")
+
+@app.post("/download/excel")
+async def create_excel(data: List[dict]):
+    """Create and return an Excel file from the provided data"""
+    try:
+        df = pd.DataFrame(data)
+        output = BytesIO()
+        df.to_excel(output, index=False)
+        output.seek(0)
+        
+        return Response(
+            content=output.getvalue(),
+            media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            headers={
+                "Content-Disposition": "attachment; filename=benchmark_results.xlsx"
+            }
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":
     main() 
