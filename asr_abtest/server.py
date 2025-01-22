@@ -333,5 +333,14 @@ async def stop_benchmark(benchmark_id: str = Form(...)):
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
+@app.get("/languages")
+async def get_languages():
+    """Return list of supported languages"""
+    try:
+        with open("languages.json") as f:
+            return json.load(f)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to load languages: {str(e)}")
+
 if __name__ == "__main__":
     main() 

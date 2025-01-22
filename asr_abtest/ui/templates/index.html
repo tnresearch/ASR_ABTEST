@@ -780,7 +780,7 @@
 </head>
 <body>
     <div class="container">
-        <h1>🎧 Transcript Analysis</h1>
+        <h1>🎧 ASR Error-Analysis UI</h1>
         
         <div class="tabs">
             <button class="tab-button active" data-tab="info">ℹ️ Info</button>
@@ -879,21 +879,23 @@
                 
                 <div class="transcription-options">
                     <div class="option-group">
-                        <label for="global-language">Language (optional):</label>
-                        <input type="text" id="global-language" class="option-input" placeholder="e.g., en, no">
+                        <label for="language">Language:</label>
+                        <select id="language" class="option-select">
+                            <!-- Will be populated from languages.json -->
+                        </select>
                     </div>
                     <div class="option-group">
-                        <label for="global-prompt">Prompt (optional):</label>
-                        <input type="text" id="global-prompt" class="option-input" placeholder="Guide the model's style">
+                        <label for="prompt">Prompt (optional):</label>
+                        <input type="text" id="prompt" class="option-input" placeholder="Guide the model's style">
                     </div>
                     <div class="option-group">
-                        <label for="global-temperature">Temperature:</label>
-                        <input type="range" id="global-temperature" min="0" max="1" step="0.1" value="0">
-                        <span id="global-temperature-value">0.0</span>
+                        <label for="temperature">Temperature:</label>
+                        <input type="range" id="temperature" min="0" max="1" step="0.1" value="0">
+                        <span id="temperature-value">0.0</span>
                     </div>
                     <div class="option-group">
-                        <label for="global-format">Response Format:</label>
-                        <select id="global-format" class="option-select">
+                        <label for="response-format">Response Format:</label>
+                        <select id="response-format" class="option-select">
                             <option value="json">JSON</option>
                             <option value="text">Text</option>
                             <option value="verbose_json">Verbose JSON</option>
@@ -1150,6 +1152,10 @@
                                     <th>WER</th>
                                     <th>Duration</th>
                                     <th>Status</th>
+                                    <th>Substitutions</th>
+                                    <th>Deletions</th>
+                                    <th>Insertions</th>
+                                    <th>Accuracy</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
@@ -1203,12 +1209,12 @@
                 document.getElementById('model-capabilities').style.display = 'block';
                 
                 // Update response format dropdowns
-                const formatSelects = document.querySelectorAll('.option-select');
-                formatSelects.forEach(select => {
-                    select.innerHTML = configData.response_formats.map(format => 
+                const formatSelect = document.getElementById('response-format');
+                if (formatSelect) {
+                    formatSelect.innerHTML = configData.response_formats.map(format => 
                         `<option value="${format}">${format.toUpperCase()}</option>`
                     ).join('');
-                });
+                }
             } catch (error) {
                 console.error('Failed to load models:', error);
                 alert('Failed to connect to server. Please check the URL and try again.');
@@ -1216,8 +1222,8 @@
         }
         
         // Update temperature value display
-        document.getElementById('global-temperature').addEventListener('input', (e) => {
-            document.getElementById('global-temperature-value').textContent = e.target.value;
+        document.getElementById('temperature').addEventListener('input', (e) => {
+            document.getElementById('temperature-value').textContent = e.target.value;
         });
         
         // Update current model when selection changes
@@ -1265,10 +1271,10 @@
         // Function to get transcription parameters
         function getTranscriptionParams() {
             return {
-                language: document.getElementById('global-language').value,
-                prompt: document.getElementById('global-prompt').value,
-                temperature: document.getElementById('global-temperature').value,
-                responseFormat: document.getElementById('global-format').value
+                language: document.getElementById('language').value,
+                prompt: document.getElementById('prompt').value,
+                temperature: document.getElementById('temperature').value,
+                responseFormat: document.getElementById('response-format').value
             };
         }
         
@@ -1780,6 +1786,13 @@
                 return;
             }
             
+            // Check if response format is JSON
+            const responseFormat = document.getElementById('response-format').value;
+            if (responseFormat.toLowerCase() !== 'json') {
+                alert('Response format must be set to JSON for benchmarking. Please change the response format in the Model tab.');
+                return;
+            }
+            
             const config = {
                 format: document.getElementById('ground-truth-format').value,
                 pattern: document.getElementById('naming-pattern').value,
@@ -1883,25 +1896,51 @@
         function displayResults(results) {
             document.getElementById('benchmark-results').style.display = 'block';
             
+            // Calculate summary statistics
+            const totalFiles = results.length;
+            const completedResults = results.filter(r => r.status === 'completed');
+            const averageWer = completedResults.length > 0 
+                ? completedResults.reduce((sum, r) => sum + r.wer, 0) / completedResults.length 
+                : 0;
+            const totalDuration = completedResults.reduce((sum, r) => sum + r.duration, 0);
+            
             // Update summary statistics
             const summaryStats = document.querySelector('.summary-stats');
             summaryStats.innerHTML = `
                 <h4>Summary</h4>
-                <p>Total Files: ${results.total_files}</p>
-                <p>Average WER: ${results.average_wer.toFixed(4)}</p>
-                <p>Total Duration: ${results.total_duration.toFixed(2)}s</p>
+                <p>Total Files: ${totalFiles}</p>
+                <p>Average WER: ${averageWer.toFixed(4)}</p>
+                <p>Total Duration: ${totalDuration.toFixed(2)}s</p>
             `;
             
             // Update detailed results table
             const tbody = document.querySelector('#results-table tbody');
-            tbody.innerHTML = results.files.map(file => `
+            // Update table headers first
+            const thead = document.querySelector('#results-table thead tr');
+            thead.innerHTML = `
+                <th>File</th>
+                <th>WER</th>
+                <th>Duration</th>
+                <th>Status</th>
+                <th>Substitutions</th>
+                <th>Deletions</th>
+                <th>Insertions</th>
+                <th>Accuracy</th>
+                <th>Actions</th>
+            `;
+            
+            tbody.innerHTML = results.map(result => `
                 <tr>
-                    <td>${file.name}</td>
-                    <td>${file.wer.toFixed(4)}</td>
-                    <td>${file.duration.toFixed(2)}s</td>
-                    <td>${file.status}</td>
+                    <td>${result.file}</td>
+                    <td>${result.status === 'completed' ? result.wer.toFixed(4) : 'N/A'}</td>
+                    <td>${result.status === 'completed' ? result.duration.toFixed(2) : 'N/A'}s</td>
+                    <td>${result.status}</td>
+                    <td>${result.status === 'completed' ? result.error_analysis.substitutions : 'N/A'}</td>
+                    <td>${result.status === 'completed' ? result.error_analysis.deletions : 'N/A'}</td>
+                    <td>${result.status === 'completed' ? result.error_analysis.insertions : 'N/A'}</td>
+                    <td>${result.status === 'completed' ? result.error_analysis.accuracy.toFixed(2) : 'N/A'}%</td>
                     <td>
-                        <button onclick="downloadResult('${file.name}')" class="btn btn-secondary">
+                        <button onclick="downloadResult('${result.file}')" class="btn btn-secondary">
                             💾 Download
                         </button>
                     </td>
@@ -1928,12 +1967,41 @@
             }
         }
         
+        // Load languages when page loads
+        async function loadLanguages() {
+            try {
+                const response = await fetch(`${getServerUrl()}/languages`);
+                const data = await response.json();
+                const languageSelect = document.getElementById('language');
+                
+                // Clear existing options
+                languageSelect.innerHTML = '';
+                
+                // Add options from languages.json
+                data.languages.forEach(lang => {
+                    const option = document.createElement('option');
+                    option.value = lang;
+                    option.textContent = lang.charAt(0).toUpperCase() + lang.slice(1); // Capitalize first letter
+                    languageSelect.appendChild(option);
+                });
+                
+                // Set default to Norwegian
+                languageSelect.value = 'norwegian';
+                console.log('Languages loaded:', data.languages); // Debug log
+            } catch (error) {
+                console.error('Failed to load languages:', error);
+                // Add fallback options if loading fails
+                const fallbackLanguages = ["norwegian", "danish", "swedish", "finnish", "english", "german"];
+                languageSelect.innerHTML = fallbackLanguages.map(lang => 
+                    `<option value="${lang}">${lang.charAt(0).toUpperCase() + lang.slice(1)}</option>`
+                ).join('');
+                languageSelect.value = 'norwegian';
+            }
+        }
+        
         // Load models when page loads
         loadModels();
-        
-        // Make sure the info tab is active by default
-        document.querySelector('.tab-button[data-tab="info"]').classList.add('active');
-        document.getElementById('info').classList.add('active');
+        loadLanguages();
     </script>
 </body>
 </html> 
