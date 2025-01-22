@@ -787,6 +787,32 @@
                     </div>
                 </div>
                 
+                <div class="transcription-options">
+                    <div class="option-group">
+                        <label for="global-language">Language (optional):</label>
+                        <input type="text" id="global-language" class="option-input" placeholder="e.g., en, no">
+                    </div>
+                    <div class="option-group">
+                        <label for="global-prompt">Prompt (optional):</label>
+                        <input type="text" id="global-prompt" class="option-input" placeholder="Guide the model's style">
+                    </div>
+                    <div class="option-group">
+                        <label for="global-temperature">Temperature:</label>
+                        <input type="range" id="global-temperature" min="0" max="1" step="0.1" value="0">
+                        <span id="global-temperature-value">0.0</span>
+                    </div>
+                    <div class="option-group">
+                        <label for="global-format">Response Format:</label>
+                        <select id="global-format" class="option-select">
+                            <option value="json">JSON</option>
+                            <option value="text">Text</option>
+                            <option value="verbose_json">Verbose JSON</option>
+                            <option value="srt">SRT</option>
+                            <option value="vtt">VTT</option>
+                        </select>
+                    </div>
+                </div>
+                
                 <div id="model-info" class="info-box">
                     <p>Currently selected model: <span id="current-model">Loading...</span></p>
                     <div id="model-capabilities" style="display: none;">
@@ -802,31 +828,6 @@
             <div class="upload-section">
                 <h2>Upload Audio for Transcription</h2>
                 <p class="section-description">Upload an audio file to make a test transcript.</p>
-                <div class="transcription-options">
-                    <div class="option-group">
-                        <label for="transcribe-language">Language (optional):</label>
-                        <input type="text" id="transcribe-language" class="option-input" placeholder="e.g., en, no">
-                    </div>
-                    <div class="option-group">
-                        <label for="transcribe-prompt">Prompt (optional):</label>
-                        <input type="text" id="transcribe-prompt" class="option-input" placeholder="Guide the model's style">
-                    </div>
-                    <div class="option-group">
-                        <label for="transcribe-temperature">Temperature:</label>
-                        <input type="range" id="transcribe-temperature" min="0" max="1" step="0.1" value="0">
-                        <span id="temperature-value">0.0</span>
-                    </div>
-                    <div class="option-group">
-                        <label for="transcribe-format">Response Format:</label>
-                        <select id="transcribe-format" class="option-select">
-                            <option value="json">JSON</option>
-                            <option value="text">Text</option>
-                            <option value="verbose_json">Verbose JSON</option>
-                            <option value="srt">SRT</option>
-                            <option value="vtt">VTT</option>
-                        </select>
-                    </div>
-                </div>
                 <form id="transcribeForm">
                     <div>
                         <label class="btn btn-secondary" for="transcribe-audio">
@@ -1045,9 +1046,61 @@
         }
         
         // Update temperature value display
-        document.getElementById('transcribe-temperature').addEventListener('input', (e) => {
-            document.getElementById('temperature-value').textContent = e.target.value;
+        document.getElementById('global-temperature').addEventListener('input', (e) => {
+            document.getElementById('global-temperature-value').textContent = e.target.value;
         });
+        
+        // Update current model when selection changes
+        document.getElementById('model-select').addEventListener('change', async (e) => {
+            document.getElementById('current-model').textContent = e.target.value;
+        });
+        
+        // Handle model save
+        document.getElementById('save-model').addEventListener('click', async () => {
+            const modelId = document.getElementById('model-select').value;
+            const formData = new FormData();
+            formData.append('model_id', modelId);
+            
+            try {
+                const response = await fetch(`${getServerUrl()}/change-model`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    alert('✅ Model changed successfully!');
+                } else {
+                    throw new Error(data.error || 'Failed to change model');
+                }
+            } catch (error) {
+                console.error('Failed to change model:', error);
+                alert('❌ Failed to change model. Please try again.');
+            }
+        });
+        
+        // Test server connection
+        document.getElementById('test-connection').addEventListener('click', async () => {
+            try {
+                const serverUrl = document.getElementById('server-url').value;
+                const response = await fetch(`${serverUrl}/current-model`);
+                const data = await response.json();
+                alert('✅ Connection successful!\nCurrent model: ' + data.current_model);
+            } catch (error) {
+                console.error('Connection test failed:', error);
+                alert('❌ Failed to connect to server. Please check the URL and try again.');
+            }
+        });
+        
+        // Function to get transcription parameters
+        function getTranscriptionParams() {
+            return {
+                language: document.getElementById('global-language').value,
+                prompt: document.getElementById('global-prompt').value,
+                temperature: document.getElementById('global-temperature').value,
+                responseFormat: document.getElementById('global-format').value
+            };
+        }
         
         // Transcribe functionality
         document.getElementById('transcribeForm').onsubmit = async (e) => {
@@ -1055,17 +1108,14 @@
             
             const formData = new FormData();
             const modelId = document.getElementById('model-select').value;
-            const language = document.getElementById('transcribe-language').value;
-            const prompt = document.getElementById('transcribe-prompt').value;
-            const temperature = document.getElementById('transcribe-temperature').value;
-            const responseFormat = document.getElementById('transcribe-format').value;
+            const params = getTranscriptionParams();
             
             formData.append('file', document.getElementById('transcribe-audio').files[0]);
             formData.append('model_id', modelId);
-            if (language) formData.append('language', language);
-            if (prompt) formData.append('prompt', prompt);
-            formData.append('temperature', temperature);
-            formData.append('response_format', responseFormat);
+            if (params.language) formData.append('language', params.language);
+            if (params.prompt) formData.append('prompt', params.prompt);
+            formData.append('temperature', params.temperature);
+            formData.append('response_format', params.responseFormat);
             
             try {
                 const response = await fetch(`${getServerUrl()}/audio/transcriptions`, {
@@ -1283,17 +1333,14 @@
             const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
             const formData = new FormData();
             const modelId = document.getElementById('model-select').value;
-            const language = document.getElementById('transcribe-language').value;
-            const prompt = document.getElementById('transcribe-prompt').value;
-            const temperature = document.getElementById('transcribe-temperature').value;
-            const responseFormat = document.getElementById('transcribe-format').value;
+            const params = getTranscriptionParams();
             
             formData.append('file', audioBlob, 'recording.wav');
             formData.append('model_id', modelId);
-            if (language) formData.append('language', language);
-            if (prompt) formData.append('prompt', prompt);
-            formData.append('temperature', temperature);
-            formData.append('response_format', responseFormat);
+            if (params.language) formData.append('language', params.language);
+            if (params.prompt) formData.append('prompt', params.prompt);
+            formData.append('temperature', params.temperature);
+            formData.append('response_format', params.responseFormat);
             
             try {
                 const response = await fetch(`${getServerUrl()}/audio/transcriptions`, {
