@@ -5,3 +5,7 @@ benchmark_results/
 *.pyd
 *.pyw
 *.pyz
+comparison_results/
+temp_audio_files/
+# Temporary files
+assets/

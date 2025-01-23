@@ -1,0 +1,10 @@
+torch
+transformers
+fastapi
+uvicorn
+python-multipart
+flask
+requests
+pandas
+openpyxl
+ffmpeg-python 

@@ -285,8 +285,8 @@
                         <div class="stat-value" id="transcript2Words">-</div>
                     </div>
                     <div class="stat-box">
-                        <div class="stat-label">Word Error Rate (WER)</div>
-                        <div class="stat-value" id="werScore">-</div>
+                        <div class="stat-label">Similarity (1-WER)</div>
+                        <div class="stat-value" id="wer-value">-</div>
                     </div>
                 </div>
             </div>
@@ -676,8 +676,8 @@
                     
                     // Calculate and display WER
                     const wer = calculateWER(words1, words2);
-                    document.getElementById('werScore').textContent = 
-                        `${(wer * 100).toFixed(1)}%`;
+                    document.getElementById('wer-value').textContent = 
+                        `${(100 - (wer * 100)).toFixed(1)}%`;
                 }
             } catch (error) {
                 console.error('Upload failed:', error);

@@ -1,4 +1,4 @@
-🎧 ASR Error-Analysis UI
+ASR Testing & Analysis UI
 ========================
 
 A web application for comprehensive testing and analysis of ASR (Automatic Speech Recognition) systems. The application consists of a FastAPI server handling transcriptions and a browser-based UI for interaction.
@@ -56,17 +56,30 @@ conda activate asr
 pip install -e .
 ```
 
-3. Start the whisper server:
+3. Start the server:
 ```bash
 serve-asr
 ```
 
-4. Start the ui server:
+4. Open `http://localhost:8000` in your browser
+
+### Docker Installation
+
+1. Build and start the containers:
 ```bash
-asr-abtest-ui
+docker-compose up --build
 ```
 
-5. Open `http://localhost:8000` in your browser
+2. Access the UI at `http://localhost:7860`
+
+For development:
+- Source code is mounted from the host machine
+- Changes to Python files are reflected immediately
+- Changes to dependencies require rebuilding the containers
+```bash
+docker-compose down
+docker-compose up --build
+```
 
 ## Development
 
@@ -77,4 +90,4 @@ The project uses:
 
 ## Note
 
-This initial version assumes that the server is running locally on the same machine as the UI. Future versions will support remote server configurations. 
+This initial version assumes that the server is running locally on the same machine as the UI. Future versions may support remote server configurations. 
