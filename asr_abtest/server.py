@@ -259,11 +259,15 @@ def main():
     parser = argparse.ArgumentParser(description='Start ASR server')
     parser.add_argument('--model', type=str, default="openai/whisper-small",
                         help='Initial model to load')
+    parser.add_argument('--host', type=str, default="0.0.0.0",
+                       help='Host to bind to')
+    parser.add_argument('--port', type=int, default=8000,
+                       help='Port to bind to')
     args = parser.parse_args()
     
     # Load default model on startup
     load_model(args.model)
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host=args.host, port=args.port)
 
 class BenchmarkRequest(BaseModel):
     format: str

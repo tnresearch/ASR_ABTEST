@@ -37,6 +37,18 @@
           {"value": 4, "label": "Good"},
           {"value": 5, "label": "Excellent"}
         ]
+      },
+      {
+        "id": "awesomeness",
+        "label": "Awesomeness",
+        "description": "How awesome is the transcription?",
+        "options": [
+          {"value": 1, "label": "Very Poor"},
+          {"value": 2, "label": "Poor"},
+          {"value": 3, "label": "Fair"},
+          {"value": 4, "label": "Good"},
+          {"value": 5, "label": "Excellent"}
+        ]
       }
     ]
   }

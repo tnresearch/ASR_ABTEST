@@ -7,13 +7,14 @@ from pathlib import Path
 import wave
 from asr_abtest.benchmark.batch_runner import BatchRunner
 from asr_abtest.benchmark.results import BenchmarkResults
+import argparse
 
 app = Flask(__name__, 
            static_folder='static',
            template_folder='templates')
 
 # Ensure upload directories exist
-UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), "assets")
+UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "assets")
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 print(f"Template directory: {os.path.join(os.path.dirname(__file__), 'templates')}")
@@ -126,7 +127,7 @@ def transcribe_audio():
 
 @app.route('/ui/config.json')
 def serve_config():
-    config_path = os.path.join(os.path.dirname(__file__), 'config.json')
+    config_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'comparison_config.json')
     try:
         with open(config_path, 'r') as f:
             return jsonify(json.load(f))
@@ -144,7 +145,7 @@ def save_metadata():
         wer = data.get('wer', {})
         
         # Create results directory if it doesn't exist
-        results_dir = os.path.join(os.path.dirname(__file__), "results")
+        results_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "comparison_results")
         os.makedirs(results_dir, exist_ok=True)
         
         # Generate filename with timestamp
@@ -267,7 +268,15 @@ async def process_benchmark():
         }), 500
 
 def main():
-    app.run(host='127.0.0.1', port=7860, debug=True)
+    parser = argparse.ArgumentParser(description='Start ASR UI')
+    parser.add_argument('--host', type=str, default="0.0.0.0",
+                       help='Host to bind to')
+    parser.add_argument('--port', type=int, default=7860,
+                       help='Port to bind to')
+    parser.add_argument('--debug', action='store_true',
+                        help='Enable debug mode')
+    args = parser.parse_args()
+    app.run(host=args.host, port=args.port, debug=args.debug)
 
 if __name__ == '__main__':
     main() 

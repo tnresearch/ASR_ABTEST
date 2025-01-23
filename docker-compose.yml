@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  asr-server:
+    build:
+      context: .
+      dockerfile: docker/asr-server.Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+    environment:
+      - PYTHONPATH=/app
+    command: python -m asr_abtest.server --host 0.0.0.0 --port 8000
+
+  ui-app:
+    build:
+      context: .
+      dockerfile: docker/ui-app.Dockerfile
+    ports:
+      - "7860:7860"
+    volumes:
+      - .:/app
+    environment:
+      - PYTHONPATH=/app
+      - ASR_SERVER_URL=http://asr-server:8000
+      - FLASK_ENV=development
+    command: python -m asr_abtest.ui.app --host 0.0.0.0 --port 7860 --debug
+    depends_on:
+      - asr-server 
