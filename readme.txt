@@ -1,3 +1,51 @@
+ASR Testing & Analysis Framework
+
+This initial version assumes that the server is running locally on the same machine as the UI. Future versions may support remote server configurations.
+
+Installation & Launch Instructions:
+
+1. Using Docker (Recommended)
+   
+   a) Build the Docker images:
+      - Make build script executable: chmod +x build.sh
+      - Run: ./build.sh
+   
+   b) Launch services:
+      - Make launch script executable: chmod +x launch.sh
+      - Launch with default GPU: ./launch.sh
+      - Or specify GPU (e.g. GPU 2): ./launch.sh 2
+   
+   c) Access the services:
+      - ASR Server: http://localhost:8000
+      - UI: http://localhost:7860
+
+2. Using Docker Compose (Alternative)
+   
+   Launch everything with: docker-compose up --build
+   Access UI at: http://localhost:7860
+
+System Requirements:
+- Docker
+- NVIDIA GPU with CUDA support
+- NVIDIA Container Toolkit installed
+- Docker with NVIDIA runtime support
+
+Notes:
+- The ASR server uses Whisper models which will be downloaded on first use
+- Source code is mounted from host machine for easy development
+- Changes to Python files are reflected immediately
+- Changes to dependencies require rebuilding: ./build.sh
+
+Stopping the Services:
+- If using launch.sh: Press Ctrl+C
+- If using Docker directly: docker stop <container-id>
+- If using Docker Compose: docker-compose down
+
+For development:
+- Source code is mounted from the host machine
+- Changes to Python files are reflected immediately
+- Changes to dependencies require rebuilding the images
+
 ASR Testing & Analysis UI
 ========================
 

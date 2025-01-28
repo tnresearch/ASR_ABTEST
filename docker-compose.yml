@@ -1,4 +1,4 @@
-version: '3.8'
+version: '3.3'
 
 services:
   asr-server:
@@ -11,6 +11,15 @@ services:
       - .:/app
     environment:
       - PYTHONPATH=/app
+      - CUDA_VISIBLE_DEVICES=2
+    runtime: nvidia
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              device_ids: ['2']
+              capabilities: [gpu]
     command: python -m asr_abtest.server --host 0.0.0.0 --port 8000
 
   ui-app:
