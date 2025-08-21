@@ -10,109 +10,18 @@
         <h1>🎧 ASR Error-Analysis UI</h1>
         
         <div class="tabs">
-            <button class="tab-button active" data-tab="info">ℹ️ About</button>
-            <button class="tab-button" data-tab="model">🤖 Model</button>
+            <button class="tab-button active" data-tab="model">🤖 Model</button>
             <button class="tab-button" data-tab="transcribe-recording">🎙️ Record </button>
             <button class="tab-button" data-tab="transcribe">📄 Transcribe File</button>
             <button class="tab-button" data-tab="compare">🔍 Compare</button>
             <button class="tab-button" data-tab="benchmark">📊 Benchmark</button>
         </div>
         
-        <!-- Info Tab -->
-        <div id="info" class="tab-content active">
-            <div class="info-section">
-                <h2>About</h2>
-                <p class="section-description">
-                    This web application provides comprehensive tools for ASR (Automatic Speech Recognition) quantitative + qualitative testing and analysis. It relies on a separate server to handle the transcription. This initial version assumes that the server is running locally on the same machine as the UI. To get an overview of the features, please see the descriptions below:
-                </p>
-
-                <h3>Basic Features</h3>
-                <div class="feature-list">
-                    <div class="feature-item">
-                        <h3>🤖 Model Configuration</h3>
-                        <p>Configure the ASR model and transcription settings:
-                            <ul>
-                                <li>Select from available ASR models</li>
-                                <li>Choose language for transcription</li>
-                                <li>Set temperature for model output</li>
-                                <li>Add optional prompts to guide transcription</li>
-                                <li>Select response format (JSON, text, etc.)</li>
-                            </ul>
-                        </p>
-                    </div>
-                    
-                    <div class="feature-item">
-                        <h3>🎙️ Record & Transcribe</h3>
-                        <p>Record audio directly in your browser for instant transcription:
-                            <ul>
-                                <li>Browser-based audio recording</li>
-                                <li>Real-time recording status</li>
-                                <li>Instant transcription after recording</li>
-                                <li>Download options for audio and transcript</li>
-                            </ul>
-                        </p>
-                    </div>
-                    
-                    <div class="feature-item">
-                        <h3>📄 Transcribe File</h3>
-                        <p>Upload and transcribe existing audio files:
-                            <ul>
-                                <li>Support for multiple audio formats (WAV, MP3, etc.)</li>
-                                <li>Word-level timestamps in transcription</li>
-                                <li>View both formatted text and raw JSON</li>
-                                <li>Download transcription results</li>
-                            </ul>
-                        </p>
-                    </div>
-                </div>
-
-                <h3>Analysis Tools</h3>
-                <div class="feature-list">
-                    <div class="feature-group qualitative">
-                        <h3>Qualitative Analysis</h3>
-                        <p class="section-description">
-                            Tools for comparing two transcriptions of the same audio file, manually rating the quality of each transcription.
-                        </p>
-                    <div class="feature-item">
-                        <h3>🔍 Compare & Annotate</h3>
-                        <p>Compare and evaluate two different transcriptions of the same audio file. Features include:
-                            <ul>
-                                    <li>Side-by-side transcript comparison</li>
-                                        <li>Word Error Rate (WER) calculation</li>
-                                    <li>Interactive audio playback with word highlighting</li>
-                                        <li>Click-to-play from any word</li>
-                                    </ul>
-                            </p>
-                        </div>
-                    </div>
-                    
-                    <div class="feature-group quantitative">
-                        <h3>Quantitative Analysis</h3>
-                        <p class="section-description">
-                            Tools for batch processing multiple audio files for performance evaluation, assuming that the ground truth is available.
-                        </p>
-                        <div class="feature-item">
-                            <h3>📊 Benchmark</h3>
-                            <p>Batch process multiple audio files for performance evaluation:
-                                <ul>
-                                    <li>Process multiple audio files with ground truth</li>
-                                    <li>Calculate WER and CER metrics</li>
-                                    <li>Track detailed error analysis (substitutions, deletions, insertions)</li>
-                                    <li>Export results in JSON and Excel formats</li>
-                                    <li>Real-time progress tracking</li>
-                            </ul>
-                        </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
         <!-- Model Tab -->
-        <div id="model" class="tab-content">
+        <div id="model" class="tab-content active">
             <div class="model-section">
                 <h2>ASR Model Selection</h2>
-                <p class="section-description">Select the ASR model to use for all transcriptions.</p>
+                <p class="section-description">Configure the ASR model for transcription. Select from available models in the list, set the language, adjust temperature, and add an optional prompt to guide the output. You can also test the connection to the ASR server. <br><br><b>PLEASE NOTE:</b> <br>1. Make sure you have enough RAM availableto run the model, <br>2. The model will need to be downloaded first. <br>3. Follow the terminal output to see status of downloading, loading and transcription.</p>
                 
                 <div class="server-config">
                     <label for="server-url">Server URL:</label>
@@ -128,7 +37,7 @@
                         <select id="model-select" class="model-dropdown">
                             <option value="loading">Loading models...</option>
                         </select>
-                        <button id="save-model" class="btn btn-primary">💾 Save</button>
+                        <button id="save-model" class="btn btn-primary">💾 Load</button>
                     </div>
                 </div>
                 
@@ -174,7 +83,7 @@
         <div id="transcribe" class="tab-content">
             <div class="upload-section">
                 <h2>Upload Audio for Transcription</h2>
-                <p class="section-description">Upload an audio file to make a test transcript.</p>
+                <p class="section-description">Upload an audio file for transcription. This tool supports various formats (WAV, MP3, etc.) and provides word-level timestamps in the output.</p>
                 <form id="transcribeForm">
                     <div>
                         <label class="btn btn-secondary" for="transcribe-audio">
@@ -208,7 +117,7 @@
         <div id="transcribe-recording" class="tab-content">
             <div class="upload-section">
                 <h2>Record Audio for Transcription</h2>
-                <p class="section-description">Make a test recording in the browser, to create a transcription.</p>
+                <p class="section-description">Record audio directly from your browser for instant transcription (requires microphone access). After recording, you can transcribe the audio and download both the recording and the transcript.</p>
                 <div class="recorder-container">
                     <div class="recorder-buttons">
                         <button id="startRecord" class="btn btn-secondary">⏺️ Start Recording</button>
@@ -241,7 +150,7 @@
         <div id="compare" class="tab-content compare-tab">
             <div class="upload-section" id="uploadSection">
                 <h2>Upload Files</h2>
-                <p class="section-description">Upload a recording accompanied by two transcripts to compare. The transcripts must be in JSON format and include timecode for each token.</p>
+                <p class="section-description">Upload an audio file and two corresponding JSON transcripts to compare them side-by-side. This feature enables synchronized playback, WER calculation, and qualitative rating to evaluate transcription accuracy.</p>
                 <form id="uploadForm">
                     <div class="upload-form-buttons">
                         <div>
@@ -341,7 +250,7 @@
         <div id="benchmark" class="tab-content">
             <div class="benchmark-section">
                 <h2>Batch Benchmark</h2>
-                <p class="section-description">Evaluate ASR performance on multiple audio files with ground truth transcripts.</p>
+                <p class="section-description">Batch process multiple audio files against their ground truth transcripts to evaluate model performance. The tool calculates metrics like WER and CER and allows you to export the detailed results.</p>
                 
                 <div class="settings-container">
                     <div class="benchmark-config">

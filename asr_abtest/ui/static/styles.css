@@ -842,3 +842,7 @@ audio::-webkit-media-controls-timeline {
     margin-top: 15px;
     background-color: var(--bg-boxes);
 }
+
+#current-model {
+    color: red;
+}
