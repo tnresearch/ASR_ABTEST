@@ -39,8 +39,8 @@ docker-compose up --build -d
 
 ### 4. Tilgang til tjenestene
 
-- **ASR Server**: http://localhost:8000
-- **UI**: http://localhost:7860
+- **ASR Server API**: http://localhost:8000
+- **UI**: http://localhost:1111
 
 ## Mac M1 Optimaliseringer
 
@@ -66,7 +66,7 @@ Dette oppsettet inkluderer:
 1.  **"No module named 'pandas'"**
     ```bash
     # Hvis du får denne feilen, installer avhengigheter manuelt:
-    docker-compose exec asr-server pip install -r requirements-mac.txt
+    docker-compose exec asr-server pip install -r requirements.txt
     ```
 2.  **Treg Ytelse**
     ```bash
@@ -125,7 +125,7 @@ conda create -n asr python=3.10
 conda activate asr
 
 # Installer avhengigheter
-pip install -r requirements-mac.txt
+pip install -r requirements.txt
 
 # Installer prosjektet
 pip install -e .

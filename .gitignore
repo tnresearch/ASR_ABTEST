@@ -10,3 +10,4 @@ temp_audio_files/
 # Temporary files
 assets/
 archive/
+.DS_Store

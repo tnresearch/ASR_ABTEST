@@ -1,13 +1,30 @@
-# PyTorch for Mac M1 with MPS support
+# Requirements for ASR AB Test project
+# Combined from requirements.txt and requirements-mac.txt
+
+# PyTorch with MPS support for Apple Silicon
 torch>=2.0.0
-torchvision
-torchaudio
-transformers
-fastapi
-uvicorn
-python-multipart
-flask
-requests
-pandas
-openpyxl
-ffmpeg-python 
+torchvision>=0.15.0
+torchaudio>=2.0.0
+
+# Hugging Face Transformers
+transformers>=4.20.0
+
+# FastAPI server
+fastapi>=0.95.0
+uvicorn[standard]>=0.20.0
+python-multipart>=0.0.6
+
+# Flask UI
+flask>=2.3.0
+requests>=2.28.0
+
+# Data handling
+pandas>=1.5.0
+openpyxl>=3.1.0
+
+# Audio processing
+ffmpeg-python>=0.2.0
+
+# Additional dependencies for performance
+numpy>=1.24.0
+scipy>=1.10.0 

@@ -9,8 +9,8 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Python dependencies optimized for Mac M1
-COPY requirements-mac.txt .
-RUN pip install --no-cache-dir -r requirements-mac.txt
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Don't copy source code - it will be mounted
 
