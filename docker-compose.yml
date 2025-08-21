@@ -23,7 +23,7 @@ services:
       platforms:
         - linux/arm64
     ports:
-      - "7860:7860"
+      - "1111:7860"
     volumes:
       - .:/app
     environment:
