@@ -1,31 +1,27 @@
-version: '3.3'
+version: '3.8'
 
 services:
   asr-server:
     build:
       context: .
       dockerfile: docker/asr-server.Dockerfile
+      platforms:
+        - linux/arm64
     ports:
       - "8000:8000"
     volumes:
       - .:/app
     environment:
       - PYTHONPATH=/app
-      - CUDA_VISIBLE_DEVICES=2
-    runtime: nvidia
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              device_ids: ['2']
-              capabilities: [gpu]
+      - PYTORCH_ENABLE_MPS_FALLBACK=1
     command: python -m asr_abtest.server --host 0.0.0.0 --port 8000
 
   ui-app:
     build:
       context: .
       dockerfile: docker/ui-app.Dockerfile
+      platforms:
+        - linux/arm64
     ports:
       - "7860:7860"
     volumes:
@@ -36,4 +32,4 @@ services:
       - FLASK_ENV=development
     command: python -m asr_abtest.ui.app --host 0.0.0.0 --port 7860 --debug
     depends_on:
-      - asr-server 
+      - asr-server

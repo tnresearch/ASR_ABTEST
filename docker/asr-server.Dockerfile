@@ -1,4 +1,4 @@
-FROM python:3.10-slim
+FROM --platform=linux/arm64 python:3.10-slim
 
 WORKDIR /app
 
@@ -8,9 +8,9 @@ RUN apt-get update && apt-get install -y \
     ffmpeg \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Python dependencies
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# Install Python dependencies optimized for Mac M1
+COPY requirements-mac.txt .
+RUN pip install --no-cache-dir -r requirements-mac.txt
 
 # Don't copy source code - it will be mounted
 

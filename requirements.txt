@@ -1,4 +1,7 @@
-torch
+# PyTorch for Mac M1 with MPS support
+torch>=2.0.0
+torchvision
+torchaudio
 transformers
 fastapi
 uvicorn
