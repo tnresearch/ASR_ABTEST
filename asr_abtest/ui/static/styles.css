@@ -614,6 +614,21 @@ audio::-webkit-media-controls-timeline {
     border: 1px solid var(--border);
 }
 
+/* Special styling for the model loading status box */
+#model-load-status {
+    background-color: #2c2c2e; /* Dark grey */
+    color: #ffffff; /* White text */
+    border-color: #555;
+}
+
+#model-load-status .progress-bar-container {
+    background-color: #555; /* Slightly lighter grey for the track */
+}
+
+#model-load-status .progress-bar {
+    background-color: var(--text-secondary); /* Orange */
+}
+
 .server-config {
     margin: 20px 0;
     text-align: center;

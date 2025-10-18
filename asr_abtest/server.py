@@ -18,6 +18,7 @@ import shutil
 from io import BytesIO
 import pandas as pd
 from fastapi.staticfiles import StaticFiles
+from .model_loader import ModelLoaderProcessor
 
 app = FastAPI()
 
@@ -53,9 +54,10 @@ class ErrorResponse(BaseModel):
     param: Optional[str] = None
 
 # Global variables to store model state
-current_model = None
-current_model_id = None
-transcriber = None
+# We wrap them in a list to make them mutable across modules
+transcriber = [None]
+current_model_id = [None]
+model_loader = ModelLoaderProcessor()
 
 SUPPORTED_AUDIO_FORMATS = [".wav", ".mp3", ".mp4", ".mpeg", ".mpga", ".m4a", ".webm"]
 
@@ -69,25 +71,6 @@ def validate_audio_format(filename: str) -> bool:
     ext = os.path.splitext(filename)[1].lower()
     return ext in SUPPORTED_AUDIO_FORMATS
 
-def load_model(model_id):
-    global current_model, current_model_id, transcriber
-    if model_id != current_model_id:
-        print(f"Loading model: {model_id}")
-        device = "cuda" if torch.cuda.is_available() else "cpu"
-        # First load the tokenizer with our specific settings
-        tokenizer = AutoTokenizer.from_pretrained(model_id, use_fast=False)
-        
-        transcriber = pipeline("automatic-speech-recognition", 
-                             model=model_id,
-                             tokenizer=tokenizer,
-                             chunk_length_s=30,
-                             return_timestamps="word",
-                             device=device)
-        current_model_id = model_id
-        current_model = transcriber
-        print(f"Model loaded successfully: {model_id}")
-    return transcriber
-
 def get_available_models():
     with open("models.json") as f:
         return json.load(f)["model_id"]
@@ -100,28 +83,45 @@ async def list_models():
 @app.get("/current-model")
 async def get_current_model():
     """Return currently loaded model"""
-    return {"current_model": current_model_id or "No model loaded"}
+    return {"current_model": current_model_id[0] or "No model loaded"}
 
-@app.post("/change-model")
-async def change_model(model_id: str = Form(...)):
-    """Change the current model"""
+@app.post("/model/load")
+async def load_new_model(model_id: str = Form(...), token: Optional[str] = Form(None)):
+    """Starts the asynchronous loading of a new model."""
     try:
-        transcriber = load_model(model_id)
-        return {
-            "success": True,
-            "model": model_id
-        }
+        # Pass the mutable list references and token to the processor
+        load_id = await model_loader.start_loading(model_id, transcriber, current_model_id, token)
+        return {"success": True, "load_id": load_id}
     except Exception as e:
-        print(f"Error changing model: {str(e)}")
-        return {
-            "success": False,
-            "error": str(e)
-        }
+        logger.error(f"Error starting model load: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/model/load/status/{load_id}")
+async def get_load_status(load_id: str):
+    """Gets the status of a model loading process."""
+    try:
+        status = model_loader.get_status(load_id)
+        return {"success": True, **status}
+    except KeyError:
+        raise HTTPException(status_code=404, detail="Load ID not found")
+    except Exception as e:
+        logger.error(f"Error getting status for {load_id}: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/model/load/cancel")
+async def cancel_model_load(load_id: str = Form(...)):
+    """Cancels a model loading process."""
+    try:
+        model_loader.cancel_loading(load_id)
+        return {"success": True}
+    except Exception as e:
+        logger.error(f"Error cancelling load for {load_id}: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
 
 @app.post("/audio/transcriptions")
 async def create_transcription(
     file: UploadFile,
-    model_id: str = Form("openai/whisper-small"),
     language: Optional[str] = Form(None),
     prompt: Optional[str] = Form(None),
     response_format: ResponseFormat = Form(ResponseFormat.json),
@@ -129,6 +129,14 @@ async def create_transcription(
 ):
     """OpenAI-like transcription endpoint"""
     try:
+        if transcriber[0] is None:
+            raise HTTPException(
+                status_code=400,
+                detail={
+                    "error": "No model is currently loaded. Please select and load a model first.",
+                    "code": "no_model_loaded",
+                }
+            )
         if not validate_audio_format(file.filename):
             raise HTTPException(
                 status_code=400,
@@ -140,7 +148,6 @@ async def create_transcription(
             )
 
         start_time = time.time()
-        transcriber = load_model(model_id)
         
         # Save uploaded file temporarily
         temp_path = f"temp_audio{os.path.splitext(file.filename)[1]}"
@@ -159,7 +166,7 @@ async def create_transcription(
             generate_kwargs["prompt"] = prompt
 
         # Transcribe
-        result = transcriber(
+        result = transcriber[0](
             temp_path,
             return_timestamps="word",
             generate_kwargs=generate_kwargs
@@ -200,7 +207,7 @@ async def create_transcription(
             "processed_date": datetime.now().isoformat(),
             "processing_duration_sec": float(format(processing_time, '.4f')),
             "file_size_kb": round(file_size / 1024, 2),
-            "model_id": model_id,
+            "model_id": current_model_id[0],
             "prompt": prompt if prompt else None,
             "temperature": float(temperature) if temperature else 0.0,
             "language": language if language else None
@@ -225,14 +232,36 @@ async def create_transcription(
 
 # Keep the old endpoint for backward compatibility
 @app.post("/transcribe")
-async def transcribe_audio(audio: UploadFile, model_id: str = Form("openai/whisper-small")):
+async def transcribe_audio(audio: UploadFile):
     """Legacy transcription endpoint"""
-    result = await create_transcription(
-        file=audio,
-        model_id=model_id,
-        response_format=ResponseFormat.verbose_json
+    if transcriber[0] is None:
+        raise HTTPException(status_code=400, detail="No model is loaded")
+
+    # Save temporary file
+    temp_path = f"temp_audio{os.path.splitext(audio.filename)[1]}"
+    with open(temp_path, "wb") as f:
+        f.write(await audio.read())
+        
+    result = transcriber[0](
+        temp_path,
+        return_timestamps="word",
+        generate_kwargs={"task": "transcribe"}
     )
-    return {"success": True, **result}
+    
+    os.remove(temp_path)
+
+    words = []
+    if isinstance(result, dict) and "chunks" in result:
+        for chunk in result["chunks"]:
+            if "text" in chunk and "timestamp" in chunk:
+                words.append({
+                    "text": chunk["text"].strip(),
+                    "start": chunk["timestamp"][0],
+                    "end": chunk["timestamp"][1] if chunk["timestamp"][1] is not None else -1
+                })
+
+    return {"success": True, "words": words, "text": result["text"]}
+
 
 @app.get("/audio/config")
 async def get_config():
@@ -241,7 +270,7 @@ async def get_config():
         "supported_formats": SUPPORTED_AUDIO_FORMATS,
         "available_models": get_available_models(),
         "response_formats": [format.value for format in ResponseFormat],
-        "current_model": current_model_id
+        "current_model": current_model_id[0]
     }
 
 @app.on_event("startup")
@@ -257,8 +286,8 @@ async def startup_event():
 
 def main():
     parser = argparse.ArgumentParser(description='Start ASR server')
-    parser.add_argument('--model', type=str, default="openai/whisper-small",
-                        help='Initial model to load')
+    # parser.add_argument('--model', type=str, default="openai/whisper-small",
+    #                     help='Initial model to load')
     parser.add_argument('--host', type=str, default="0.0.0.0",
                        help='Host to bind to')
     parser.add_argument('--port', type=int, default=8000,
@@ -266,7 +295,7 @@ def main():
     args = parser.parse_args()
     
     # Load default model on startup
-    load_model(args.model)
+    # load_model(args.model)
     uvicorn.run(app, host=args.host, port=args.port)
 
 class BenchmarkRequest(BaseModel):
@@ -285,6 +314,8 @@ async def start_benchmark(
     config: str = Form(...)
 ):
     """Start a new benchmark process"""
+    if transcriber[0] is None:
+        raise HTTPException(status_code=400, detail="Cannot start benchmark, no model is loaded.")
     try:
         logger.info(f"Received benchmark request with {len(audio_files)} audio files and {len(truth_files)} truth files")
         

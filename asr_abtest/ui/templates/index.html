@@ -37,10 +37,25 @@
                         <select id="model-select" class="model-dropdown">
                             <option value="loading">Loading models...</option>
                         </select>
-                        <button id="save-model" class="btn btn-primary">💾 Load</button>
+                        <button id="load-model-btn" class="btn btn-primary">💾 Load Model</button>
+                        <button id="cancel-load-btn" class="btn btn-warning" style="display: none;">⏹️ Cancel</button>
                     </div>
                 </div>
                 
+                <div class="model-options-extra">
+                    <div class="option-group">
+                        <label for="hf-token">Hugging Face Token (optional):</label>
+                        <input type="password" id="hf-token" class="option-input" placeholder="Indsæt din hf_... token her">
+                    </div>
+                </div>
+
+                <div id="model-load-status" class="info-box" style="display: none;">
+                    <p id="model-load-details">Details...</p>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar" id="model-load-progress-bar" style="width: 0%;"></div>
+                    </div>
+                </div>
+
                 <div class="transcription-options">
                     <div class="option-group">
                         <label for="language">Language:</label>
@@ -70,7 +85,7 @@
                 </div>
                 
                 <div id="model-info" class="info-box">
-                    <p>Currently selected model: <span id="current-model">Loading...</span></p>
+                    <p>Currently loaded model: <span id="current-model-status">Loading...</span></p>
                     <div id="model-capabilities" style="display: none;">
                         <p>Supported formats: <span id="supported-formats">Loading...</span></p>
                         <p>Available response formats: <span id="response-formats">Loading...</span></p>
@@ -359,19 +374,18 @@
                 
                 // Update settings display if benchmark tab is clicked
                 if (button.dataset.tab === 'benchmark') {
-                    document.getElementById('settings-model').textContent = document.getElementById('model-select').value;
-                    document.getElementById('settings-language').textContent = document.getElementById('language').value;
-                    document.getElementById('settings-temperature').textContent = document.getElementById('temperature').value;
-                    document.getElementById('settings-format').textContent = document.getElementById('response-format').value;
-                    document.getElementById('settings-prompt').textContent = document.getElementById('prompt').value || 'None';
+                    updateSettingsDisplay();
                 }
             });
         });
         
+        let currentLoadId = null;
+        let modelLoadPollingInterval = null;
+
         // Load available models when page loads
-        async function loadModels() {
+        async function loadInitialData() {
             try {
-                const serverUrl = document.getElementById('server-url').value;
+                const serverUrl = getServerUrl();
                 const response = await fetch(`${serverUrl}/models`);
                 const data = await response.json();
                 const select = document.getElementById('model-select');
@@ -382,8 +396,11 @@
                 // Get and display current model
                 const currentResponse = await fetch(`${serverUrl}/current-model`);
                 const currentData = await currentResponse.json();
-                document.getElementById('current-model').textContent = currentData.current_model;
+                document.getElementById('current-model-status').textContent = currentData.current_model;
                 
+                // Disable action buttons if no model is loaded
+                toggleActionButtons(currentData.current_model !== "No model loaded");
+
                 // Get server capabilities
                 const configResponse = await fetch(`${serverUrl}/audio/config`);
                 const configData = await configResponse.json();
@@ -399,8 +416,9 @@
                     ).join('');
                 }
             } catch (error) {
-                console.error('Failed to load models:', error);
+                console.error('Failed to load initial data:', error);
                 alert('Failed to connect to server. Please check the URL and try again.');
+                document.getElementById('current-model-status').textContent = 'Connection failed';
             }
         }
         
@@ -409,34 +427,107 @@
             document.getElementById('temperature-value').textContent = e.target.value;
         });
         
-        // Update current model when selection changes
-        document.getElementById('model-select').addEventListener('change', async (e) => {
-            document.getElementById('current-model').textContent = e.target.value;
-        });
         
-        // Handle model save
-        document.getElementById('save-model').addEventListener('click', async () => {
+        // Handle model loading logic
+        document.getElementById('load-model-btn').addEventListener('click', async () => {
             const modelId = document.getElementById('model-select').value;
+            const hfToken = document.getElementById('hf-token').value;
+            
             const formData = new FormData();
             formData.append('model_id', modelId);
+            if (hfToken) {
+                formData.append('token', hfToken);
+            }
+            
+            // Update UI to loading state
+            document.getElementById('load-model-btn').disabled = true;
+            document.getElementById('cancel-load-btn').style.display = 'inline-flex';
+            document.getElementById('model-load-status').style.display = 'block';
+            document.getElementById('model-load-details').textContent = 'Starting model load...';
+            document.getElementById('model-load-progress-bar').style.width = '0%';
             
             try {
-                const response = await fetch(`${getServerUrl()}/change-model`, {
+                const response = await fetch(`${getServerUrl()}/model/load`, {
                     method: 'POST',
                     body: formData
                 });
                 
                 const data = await response.json();
-                if (data.success) {
-                    alert('✅ Model changed successfully!');
+                if (data.success && data.load_id) {
+                    currentLoadId = data.load_id;
+                    // Start polling
+                    modelLoadPollingInterval = setInterval(pollModelLoadStatus, 1000);
                 } else {
-                    throw new Error(data.error || 'Failed to change model');
+                    throw new Error(data.detail || 'Failed to start model loading');
                 }
             } catch (error) {
-                console.error('Failed to change model:', error);
-                alert('❌ Failed to change model. Please try again.');
+                console.error('Failed to start model load:', error);
+                resetModelLoadUI('❌ Failed to start loading. ' + error.message);
             }
         });
+
+        document.getElementById('cancel-load-btn').addEventListener('click', async () => {
+            if (!currentLoadId) return;
+            
+            try {
+                const formData = new FormData();
+                formData.append('load_id', currentLoadId);
+                await fetch(`${getServerUrl()}/model/load/cancel`, {
+                    method: 'POST',
+                    body: formData
+                });
+                // The polling will handle the UI update once it gets the "cancelled" status
+            } catch (error) {
+                console.error('Failed to cancel model load:', error);
+                alert('❌ Could not send cancel request. Please check server connection.');
+            }
+        });
+
+        function resetModelLoadUI(finalMessage) {
+            clearInterval(modelLoadPollingInterval);
+            modelLoadPollingInterval = null;
+            currentLoadId = null;
+            
+            document.getElementById('load-model-btn').disabled = false;
+            document.getElementById('cancel-load-btn').style.display = 'none';
+            document.getElementById('model-load-details').textContent = finalMessage;
+        }
+
+        async function pollModelLoadStatus() {
+            if (!currentLoadId) return;
+
+            try {
+                const response = await fetch(`${getServerUrl()}/model/load/status/${currentLoadId}`);
+                const data = await response.json();
+
+                if (data.success) {
+                    const status = data.status;
+                    const details = data.details;
+                    const progress = data.progress || 0;
+
+                    document.getElementById('model-load-details').textContent = details;
+                    document.getElementById('model-load-progress-bar').style.width = `${progress}%`;
+
+                    if (status === 'completed') {
+                        resetModelLoadUI(`✅ ${details}`);
+                        document.getElementById('current-model-status').textContent = data.model_id;
+                        toggleActionButtons(true);
+                    } else if (status === 'failed' || status === 'cancelled') {
+                        resetModelLoadUI(`❌ ${details}`);
+                        toggleActionButtons(false);
+                    }
+                }
+            } catch (error) {
+                console.error('Polling failed:', error);
+                resetModelLoadUI('❌ Polling failed. Check server connection.');
+            }
+        }
+        
+        function toggleActionButtons(enabled) {
+            document.querySelectorAll('#transcribeForm button, #transcribeRecording, #start-benchmark').forEach(button => {
+                button.disabled = !enabled;
+            });
+        }
         
         // Test server connection
         document.getElementById('test-connection').addEventListener('click', async () => {
@@ -1238,8 +1329,8 @@
             }
         }
         
-        // Load models when page loads
-        loadModels();
+        // Load initial data when page loads
+        loadInitialData();
         loadLanguages();
         
         // Function to update settings display
